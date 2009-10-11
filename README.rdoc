@@ -1,0 +1,16 @@
+= rack-rewrite
+
+A rack middleware for writing rewrite rules.  In many cases you can get away with rack-rewrite
+instead of writing Apache mod_rewrite rules.
+
+== USAGE IN A RAILS APP
+  config.gem 'rack-rewrite', '~> 0.1.0'
+  config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
+    rewrite '/wiki/John_Trupiano', '/john'
+    r301 '/wiki/Yair_Flicker', '/yair'
+    r302 '/wiki/Greg_Jastrab', '/greg'
+  end
+
+== Copyright
+
+Copyright (c) 2009 John Trupiano. See LICENSE for details.
