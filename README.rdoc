@@ -1,15 +1,20 @@
 = rack-rewrite
 
-A rack middleware for writing rewrite rules.  In many cases you can get away with rack-rewrite
+A rack middleware for enforcing rewrite rules. In many cases you can get away with rack-rewrite
 instead of writing Apache mod_rewrite rules.
 
-== USAGE IN A RAILS APP
+== Usage in a rails app
   config.gem 'rack-rewrite', '~> 0.1.0'
   config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
     rewrite '/wiki/John_Trupiano', '/john'
     r301 '/wiki/Yair_Flicker', '/yair'
     r302 '/wiki/Greg_Jastrab', '/greg'
   end
+
+== Notes
+
+* Haven't tested full paths for :rewrite, :r301, :r302
+* No regular expression support yet
 
 == Copyright
 

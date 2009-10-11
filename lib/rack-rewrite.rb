@@ -30,7 +30,7 @@ module Rack
       end
     end
     
-    # This will probably have to changeas rule matching gets more complicated
+    # This will probably have to change as rule matching gets more complicated
     def find_rule(env)
       @rule_set.rules.detect { |rule| rule[1] == env['PATH_INFO'] }
     end
