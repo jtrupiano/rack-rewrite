@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "lib/rack-rewrite.rb",
+     "rack-rewrite.gemspec",
      "test/rack-rewrite_test.rb",
      "test/test_helper.rb"
   ]
