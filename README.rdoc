@@ -5,6 +5,7 @@ instead of writing Apache mod_rewrite rules.
 
 == Usage in a rails app
   config.gem 'rack-rewrite', '~> 0.1.0'
+  require 'rack-rewrite
   config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
     rewrite '/wiki/John_Trupiano', '/john'
     r301 '/wiki/Yair_Flicker', '/yair'
