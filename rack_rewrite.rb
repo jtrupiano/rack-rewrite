@@ -17,15 +17,21 @@ module Rack
     # This logic needs to be pushed into Rule subclasses
     def apply(rule, env)
       case rule[0]
-      when :'301'
+      when :r301
         [301, {'Location' => rule[2]}, ['Redirecting...']]
+      when :r302
+        [302, {'Location' => rule[2]}, ['Redirecting...']]
       when :rewrite
-        @app.call(env.merge({'PATH_INFO' => rule[2]}))
+        # return [200, {}, {:content => env.inspect}]
+        env['PATH_INFO'] = env['REQUEST_URI'] = rule[2]
+        @app.call(env)
+      else
+        raise Exception.new("Unsupported rule: #{rule[0]}")
       end
     end
     
+    # This will probably have to changeas rule matching gets more complicated
     def find_rule(env)
-      puts "Looking for #{env['PATH_INFO']}"
       @rule_set.rules.detect { |rule| rule[1] == env['PATH_INFO'] }
     end
     
@@ -39,14 +45,10 @@ module Rack
       private
         # We're explicitly defining the functions for our DSL rather than using
         # method_missing
-        def rewrite(from, to)
-          puts "Adding rewrite from #{from} to #{to}"
-          @rules << [:rewrite, from, to]
-        end
-        
-        # ugh
-        define_method(:'301') do |from, to|
-          @rules << [:'301', from, to]
+        %w(rewrite r301 r302).each do |meth|
+          define_method(meth) do |from, to|
+            @rules << [meth.to_sym, from, to]
+          end
         end
     end
   end
@@ -66,20 +68,37 @@ if __FILE__ == $0
       {'PATH_INFO' => '/wiki/Yair_Flicker'}.merge(overrides)
     end
     
-    def self.should_return_a_301_to(&block)
-      should "return a 301" do
-        @app.expects(:call).never
-        ret = @rack.call(call_args)
-        assert ret.is_a?(Array), 'return value is not a valid rack response'
-        assert_equal 301, ret[0]
-        assert_equal block.call, ret[1]['Location'], 'Location is incorrect'
+    def self.should_not_halt
+      should "not halt the rack chain" do
+        @app.expects(:call).once
+        @rack.call(call_args)
       end
     end
     
-    def self.should_pass_through_to_app(headers={})
-      should "pass through to app" do
-        @app.expects(:call).with(call_args.merge(headers)).once
+    def self.should_be_a_rack_response
+      should 'be a rack a response' do
+        ret = @rack.call(call_args)
+        assert ret.is_a?(Array), 'return value is not a valid rack response'
+        assert_equal 3, ret.size, 'should have 3 arguments'
+      end
+    end
+    
+    def self.should_halt
+      should "should halt the rack chain" do
+        @app.expects(:call).never
         @rack.call(call_args)
+      end
+      should_be_a_rack_response
+    end
+        
+    def self.should_location_redirect_to(location, code)
+      should "respond with http status code #{code}" do
+        ret = @rack.call(call_args)
+        assert_equal code, ret[0]
+      end
+      should 'send a location header' do
+        ret = @rack.call(call_args)
+        assert_equal location, ret[1]['Location'], 'Location is incorrect'
       end
     end
     
@@ -88,33 +107,44 @@ if __FILE__ == $0
         @app = Class.new { def call; true; end }.new
       end
     
-      context 'when no rewrite rules match ' do
-        setup do
+      context 'when no rewrite rule matches' do
+        setup {
           @rack = Rack::Rewrite.new(@app)
-        end
-      
-        should_pass_through_to_app
+        }
+        should_not_halt
       end
       
       context 'when a 301 rule matches' do
-        setup do
+        setup {
           @rack = Rack::Rewrite.new(@app) do
-            # ugh
-            send(:'301', '/wiki/Yair_Flicker', '/yair')
+            r301 '/wiki/Yair_Flicker', '/yair'
           end
-        end
-        
-        should_return_a_301_to { '/yair' }
+        }
+        should_halt
+        should_location_redirect_to('/yair', 301)
+      end
+      
+      context 'when a 302 rule matches' do
+        setup {
+          @rack = Rack::Rewrite.new(@app) do
+            r302 '/wiki/Yair_Flicker', '/yair'
+          end
+        }
+        should_halt
+        should_location_redirect_to('/yair', 302)
       end
       
       context 'when a rewrite rule matches' do
-        setup do
+        setup {
           @rack = Rack::Rewrite.new(@app) do
             rewrite '/wiki/Yair_Flicker', '/john'
           end
+        }
+        should_not_halt
+        should "set PATH_INFO and REQUEST_URI to '/john'" do
+          @app.expects(:call).with(call_args.merge({'PATH_INFO' => '/john', 'REQUEST_URI' => '/john'})).once
+          @rack.call(call_args)
         end
-        
-        should_pass_through_to_app({'PATH_INFO' => '/john'})
       end
     end
   end
