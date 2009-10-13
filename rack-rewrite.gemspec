@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["John Trupiano"]
-  s.date = %q{2009-10-10}
+  s.date = %q{2009-10-12}
   s.description = %q{A rack middleware for enforcing rewrite rules. In many cases you can get away with rack-rewrite instead of writing Apache mod_rewrite rules.}
   s.email = %q{jtrupiano@gmail.com}
   s.extra_rdoc_files = [
@@ -24,8 +24,10 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "lib/rack-rewrite.rb",
+     "lib/rack-rewrite/rule.rb",
      "rack-rewrite.gemspec",
      "test/rack-rewrite_test.rb",
+     "test/rule_test.rb",
      "test/test_helper.rb"
   ]
   s.homepage = %q{http://github.com/jtrupiano/rack-rewrite}
@@ -36,6 +38,7 @@ Gem::Specification.new do |s|
   s.summary = %q{A rack middleware for enforcing rewrite rules}
   s.test_files = [
     "test/rack-rewrite_test.rb",
+     "test/rule_test.rb",
      "test/test_helper.rb"
   ]
 
