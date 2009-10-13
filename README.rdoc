@@ -1,21 +1,92 @@
 = rack-rewrite
 
-A rack middleware for enforcing rewrite rules. In many cases you can get away with rack-rewrite
-instead of writing Apache mod_rewrite rules.
+A rack middleware for defining and applying rewrite rules. In many cases you 
+can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 
-== Usage in a rails app
+== Use Cases
+
+=== Rebuild of existing site in a new technology
+
+It's very common for sites built in older technologies to be rebuilt with the 
+latest and greatest.  Let's consider a site that has already established quite
+a bit of "google juice."  When we launch the new site, we don't want to lose
+that hard-earned reputation.  By writing rewrite rules that issue 301's for
+old URL's, we can "transfer" that google ranking to the new site.  An example
+rule might look like:
+
+  rewrite '/contact-us.php', '/contact-us'
+  rewrite '/wiki/John_Trupiano', '/john'
+
+=== Retiring old routes
+
+As a web application evolves you will undoubtedly reach a point where you need
+to change the name of something (a model, e.g.).  This name change will
+typically require a similar change to your routing.  The danger here is that
+any URL's previously generated (in a transactional email for instance) will
+have the URL hard-coded.  In order for your rails app to continue to serve
+this URL, you'll need to add an extra entry to your routes file.
+Alternatively, you could use rack-rewrite to redirect or pass through requests
+to these routes and keep your routes.rb clean.
+
+  rewrite %r{/features(.*)}, '/facial_features$1'
+
+== Sample rackup file
+  
+  use Rack::Rewrite do
+    rewrite '/wiki/John_Trupiano', '/john'
+    r301 '/wiki/Yair_Flicker', '/yair'
+    r302 '/wiki/Greg_Jastrab', '/greg'
+    r301 %r{/wiki/(\w+)_\w+}, '/$1'
+  end
+
+== Sample usage in a rails app
   config.gem 'rack-rewrite', '~> 0.1.0'
   require 'rack-rewrite
   config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
     rewrite '/wiki/John_Trupiano', '/john'
     r301 '/wiki/Yair_Flicker', '/yair'
     r302 '/wiki/Greg_Jastrab', '/greg'
+    r301 %r{/wiki/(\w+)_\w+}, '/$1'
   end
+  
+== Rewrite Rules
 
+=== :rewrite
+
+Calls to #rewrite will simply update the PATH_INFO and REQUEST_URI HTTP header
+values and pass the request onto the next chain in the Rack stack.  The URL
+that a user's browser will show will not be changed.  See these examples:
+
+  rewrite '/wiki/John_Trupiano', '/john'   # [1]
+  rewrite %r{/wiki/(\w+)_\w+}, '/$1'       # [2]
+
+For [1], the user's browser will continue to display /wiki/John_Trupiano, but
+the actual HTTP header values for PATH_INFO and REQUEST_URI in the request 
+will be changed to /john for subsequent nodes in the Rack stack.  Rails
+reads these headers to determine which routes will match.
+
+Rule [2] showcases the use of regular expressions and substitutions.  [2] is a 
+generalized version of [1] that will match any /wiki/FirstName_LastName URL's
+and rewrite them as the first name only.  This is an actual catch-all rule we 
+applied when we rebuilt our website in September 2009 
+( http://www.smartlogicsolutions.com ).
+
+=== :r301, :302
+
+Calls to #r301 and #r302 have the same signature as #rewrite.  The difference,
+however, is that these actually short-circuit the rack stack and send back
+301's and 302's, respectively.  See these examples:
+
+  r301 '/wiki/John_Trupiano', '/john'                # [1]
+  r301 '/wiki/(.*)', 'http://www.google.com/?q=$1'   # [2]
+  
+Recall that rules are interpreted from top to bottom.  So you can install 
+"default" rewrite rules if you like.  [2] is a sample default rule that
+will redirect all other requests to the wiki to a google search.
+  
 == Notes
 
 * Haven't tested full paths for :rewrite, :r301, :r302
-* No regular expression support yet
 
 == Copyright
 

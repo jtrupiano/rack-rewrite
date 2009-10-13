@@ -3,6 +3,8 @@ $: << File.expand_path(File.dirname(__FILE__))
 require 'rack-rewrite/rule'
 
 module Rack
+  # A rack middleware for defining and applying rewrite rules. In many cases you 
+  # can get away with rack-rewrite instead of writing Apache mod_rewrite rules.  
   class Rewrite
     def initialize(app, &rule_block)
       @app = app
@@ -20,10 +22,8 @@ module Rack
     end
         
     private
-    
-      def find_first_matching_rule(env) #:nodoc
+      def find_first_matching_rule(env) #:nodoc:
         @rule_set.rules.detect { |rule| rule.matches?(env['PATH_INFO']) }
-      end
-    
+      end    
   end
 end
