@@ -83,7 +83,20 @@ however, is that these actually short-circuit the rack stack and send back
 Recall that rules are interpreted from top to bottom.  So you can install 
 "default" rewrite rules if you like.  [2] is a sample default rule that
 will redirect all other requests to the wiki to a google search.
+
+== Tips
+
+=== Keeping your querystring
+
+When rewriting a URL, you may want to keep your querystring in tact (for 
+example if you're tracking traffic sources).  You will need to include a
+capture group and substitution pattern in your rewrite rule to achieve this.
+
+  rewrite %r{/wiki/John_Trupiano(\?.*)?}, '/john$1'
   
+This rule will store the querystring in a capture group (via '(?.*)' ) and
+will substitute the querystring back into the rewritten URL (via $1).
+
 == Copyright
 
 Copyright (c) 2009 John Trupiano. See LICENSE for details.
