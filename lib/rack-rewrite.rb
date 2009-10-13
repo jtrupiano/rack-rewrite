@@ -1,3 +1,7 @@
+$: << File.expand_path(File.dirname(__FILE__))
+
+require 'rack-rewrite/rule'
+
 module Rack
   class Rewrite
     def initialize(app, &rule_block)
@@ -7,49 +11,18 @@ module Rack
     end
     
     def call(env)
-      if matched_rule = find_rule(env)
-        apply(matched_rule, env)
+      if matched_rule = find_first_matching_rule(env)
+        matched_rule.apply!(env, @app)
       else
         @app.call(env)
       end
     end
+        
+    private
     
-    # This logic needs to be pushed into Rule subclasses
-    def apply(rule, env)
-      case rule[0]
-      when :r301
-        [301, {'Location' => rule[2]}, ['Redirecting...']]
-      when :r302
-        [302, {'Location' => rule[2]}, ['Redirecting...']]
-      when :rewrite
-        # return [200, {}, {:content => env.inspect}]
-        env['PATH_INFO'] = env['REQUEST_URI'] = rule[2]
-        @app.call(env)
-      else
-        raise Exception.new("Unsupported rule: #{rule[0]}")
+      def find_first_matching_rule(env) #:nodoc
+        @rule_set.rules.detect { |rule| rule.matches?(env['PATH_INFO']) }
       end
-    end
     
-    # This will probably have to change as rule matching gets more complicated
-    def find_rule(env)
-      @rule_set.rules.detect { |rule| rule[1] == env['PATH_INFO'] }
-    end
-    
-    class RuleSet
-      
-      attr_reader :rules
-      def initialize
-        @rules = []
-      end
-      
-      private
-        # We're explicitly defining the functions for our DSL rather than using
-        # method_missing
-        %w(rewrite r301 r302).each do |meth|
-          define_method(meth) do |from, to|
-            @rules << [meth.to_sym, from, to]
-          end
-        end
-    end
   end
 end
