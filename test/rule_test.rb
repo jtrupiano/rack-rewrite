@@ -8,10 +8,33 @@ class RuleTest < Test::Unit::TestCase
       env = {'PATH_INFO' => '/abc'}
       assert_equal rule.send(:interpret_to, '/abc'), rule.apply!(env)[1]['Location']
     end
+    
+    should 'keep the QUERYSTRING when a 301 rule matches a URL with a querystring' do
+      rule = Rack::Rewrite::Rule.new(:r301, %r{/john(.*)}, '/yair$1')
+      env = {'REQUEST_URI' => '/john?show_bio=1', 'PATH_INFO' => '/john', 'QUERYSTRING' => 'show_bio=1'}
+      assert_equal '/yair?show_bio=1', rule.apply!(env)[1]['Location']
+    end
+    
+    should 'keep the QUERYSTRING when a rewrite rule that requires a querystring matches a URL with a querystring' do
+      rule = Rack::Rewrite::Rule.new(:rewrite, %r{/john(\?.*)}, '/yair$1')
+      env = {'REQUEST_URI' => '/john?show_bio=1', 'PATH_INFO' => '/john', 'QUERYSTRING' => 'show_bio=1'}
+      rule.apply!(env)
+      assert_equal '/yair', env['PATH_INFO']
+      assert_equal 'show_bio=1', env['QUERYSTRING']
+      assert_equal '/yair?show_bio=1', env['REQUEST_URI']
+    end
+    
+    should 'update the QUERYSTRING when a rewrite rule changes its value' do
+      rule = Rack::Rewrite::Rule.new(:rewrite, %r{/(\w+)\?show_bio=(\d)}, '/$1?bio=$2')
+      env = {'REQUEST_URI' => '/john?show_bio=1', 'PATH_INFO' => '/john', 'QUERYSTRING' => 'show_bio=1'}
+      rule.apply!(env)
+      assert_equal '/john', env['PATH_INFO']
+      assert_equal 'bio=1', env['QUERYSTRING']
+      assert_equal '/john?bio=1', env['REQUEST_URI']
+    end
   end
   
   context 'Rule#matches' do
-    
     context 'Given any rule with a "from" string of /features' do
       setup do
         @rule = Rack::Rewrite::Rule.new(:rewrite, '/features', '/facial_features')
@@ -58,7 +81,6 @@ class RuleTest < Test::Unit::TestCase
   end
   
   context 'Rule#interpret_to' do
-    
     should 'return #to when #from is a string' do
       rule = Rack::Rewrite::Rule.new(:rewrite, '/abc', '/def')
       assert_equal '/def', rule.send(:interpret_to, '/abc')
@@ -80,5 +102,4 @@ class RuleTest < Test::Unit::TestCase
       assert_equal 'jihgfedcba', rule.send(:interpret_to, "abcdefghij")
     end
   end
-  
 end

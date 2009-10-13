@@ -10,9 +10,9 @@ module Rack
         # We're explicitly defining private functions for our DSL rather than
         # using method_missing
         
-        # Creates a rewrite rule that will simply rewrite the REQUEST_URI and
-        # PATH_INFO headers of the Rack environment.  The user's browser
-        # will continue to show the initially requested URL.
+        # Creates a rewrite rule that will simply rewrite the REQUEST_URI,
+        # PATH_INFO, and QUERYSTRING headers of the Rack environment.  The 
+        # user's browser will continue to show the initially requested URL.
         # 
         #  rewrite '/wiki/John_Trupiano', '/john'
         #  rewrite %r{/wiki/(\w+)_\w+}, '/$1'        
@@ -55,10 +55,10 @@ module Rack
         end
       end
 
-      # Either (a) return a Rack response (short-circuting the Rack stack), or
+      # Either (a) return a Rack response (short-circuiting the Rack stack), or
       # (b) alter env as necessary and return true
       def apply!(env) #:nodoc:
-        interpreted_to = self.send(:interpret_to, env['PATH_INFO'])
+        interpreted_to = self.send(:interpret_to, env['REQUEST_URI'])
         case self.rule_type
         when :r301
           [301, {'Location' => interpreted_to}, ['Redirecting...']]
@@ -66,7 +66,14 @@ module Rack
           [302, {'Location' => interpreted_to}, ['Redirecting...']]
         when :rewrite
           # return [200, {}, {:content => env.inspect}]
-          env['PATH_INFO'] = env['REQUEST_URI'] = interpreted_to
+          env['REQUEST_URI'] = interpreted_to
+          if q_index = interpreted_to.index('?')
+            env['PATH_INFO'] = interpreted_to[0..q_index-1]
+            env['QUERYSTRING'] = interpreted_to[q_index+1..interpreted_to.size-1]
+          else
+            env['PATH_INFO'] = interpreted_to
+            env['QUERYSTRING'] = ''
+          end
           true
         else
           raise Exception.new("Unsupported rule: #{self.rule_type}")
