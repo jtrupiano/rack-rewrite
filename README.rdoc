@@ -14,8 +14,8 @@ that hard-earned reputation.  By writing rewrite rules that issue 301's for
 old URL's, we can "transfer" that google ranking to the new site.  An example
 rule might look like:
 
-  rewrite '/contact-us.php', '/contact-us'
-  rewrite '/wiki/John_Trupiano', '/john'
+  r301 '/contact-us.php', '/contact-us'
+  r301 '/wiki/John_Trupiano', '/john'
 
 === Retiring old routes
 
