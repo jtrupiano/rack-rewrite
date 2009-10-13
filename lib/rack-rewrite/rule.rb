@@ -69,7 +69,7 @@ module Rack
           env['PATH_INFO'] = env['REQUEST_URI'] = interpreted_to
           true
         else
-          raise Exception.new("Unsupported rule: #{rule.rule_type}")
+          raise Exception.new("Unsupported rule: #{self.rule_type}")
         end
       end
       
