@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/jtrupiano/rack-rewrite}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubyforge_project = %q{rack-rewrite}
+  s.rubyforge_project = %q{johntrupiano}
   s.rubygems_version = %q{1.3.5}
   s.summary = %q{A rack middleware for enforcing rewrite rules}
   s.test_files = [
