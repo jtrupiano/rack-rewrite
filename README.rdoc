@@ -32,6 +32,8 @@ to these routes and keep your routes.rb clean.
 
 == Sample rackup file
   
+  gem 'rack-rewrite', '~> 0.1.2'
+  require 'rack-rewrite
   use Rack::Rewrite do
     rewrite '/wiki/John_Trupiano', '/john'
     r301 '/wiki/Yair_Flicker', '/yair'
@@ -40,7 +42,7 @@ to these routes and keep your routes.rb clean.
   end
 
 == Sample usage in a rails app
-  config.gem 'rack-rewrite', '~> 0.1.0'
+  config.gem 'rack-rewrite', '~> 0.1.2'
   require 'rack-rewrite
   config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
     rewrite '/wiki/John_Trupiano', '/john'
