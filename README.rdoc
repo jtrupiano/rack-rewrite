@@ -84,10 +84,6 @@ Recall that rules are interpreted from top to bottom.  So you can install
 "default" rewrite rules if you like.  [2] is a sample default rule that
 will redirect all other requests to the wiki to a google search.
   
-== Notes
-
-* Haven't tested full paths for :rewrite, :r301, :r302
-
 == Copyright
 
 Copyright (c) 2009 John Trupiano. See LICENSE for details.
