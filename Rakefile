@@ -10,7 +10,7 @@ begin
     gem.email = "jtrupiano@gmail.com"
     gem.homepage = "http://github.com/jtrupiano/rack-rewrite"
     gem.authors = ["John Trupiano"]
-    gem.rubyforge_project = "rack-rewrite"
+    gem.rubyforge_project = "johntrupiano"
     gem.add_development_dependency "shoulda"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
