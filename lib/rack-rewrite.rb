@@ -12,10 +12,11 @@ module Rack
     
     def call(env)
       if matched_rule = find_first_matching_rule(env)
-        matched_rule.apply!(env, @app)
-      else
-        @app.call(env)
+        rack_response = matched_rule.apply!(env)
+        # Don't invoke the app if applying the rule returns a rack response
+        return rack_response unless rack_response === true
       end
+      @app.call(env)
     end
         
     private

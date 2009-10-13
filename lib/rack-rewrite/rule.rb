@@ -36,7 +36,9 @@ module Rack
         end
       end
 
-      def apply!(env, app)
+      # Either (a) return a Rack response (short-circuting the Rack stack), or
+      # (b) alter env as necessary and return true
+      def apply!(env)
         case rule_type
         when :r301
           [301, {'Location' => self.to}, ['Redirecting...']]
@@ -45,7 +47,7 @@ module Rack
         when :rewrite
           # return [200, {}, {:content => env.inspect}]
           env['PATH_INFO'] = env['REQUEST_URI'] = self.to
-          app.call(env)
+          true
         else
           raise Exception.new("Unsupported rule: #{rule.rule_type}")
         end
