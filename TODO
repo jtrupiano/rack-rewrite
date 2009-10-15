@@ -1,0 +1,3 @@
+* Add :host support to restrict which URL's a rewrite rule matches [10/15/09]
+* Add :if => lambda support for arbitrary conditional rule application (this will allow us to do the capistrano maintenance page w/o apache's mod_rewrite)
+* Add support for specifying a config file instead of passing a block (e.g. config/rewrite.rb)
