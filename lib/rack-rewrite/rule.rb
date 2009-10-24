@@ -83,13 +83,21 @@ module Rack
       private
         # is there a better way to do this?
         def interpret_to(path) #:nodoc:
-          if self.from.is_a?(Regexp)
-            if from_match_data = self.from.match(path)
-              computed_to = self.to.dup
-              (from_match_data.size - 1).downto(1) do |num|
-                computed_to.gsub!("$#{num}", from_match_data[num])
+          if self.to.is_a?(Proc)
+            if self.from.is_a?(Regexp)
+              return self.to.call(self.from.match(path))
+            else
+              return self.to.call(self.from)
+            end
+          else
+            if self.from.is_a?(Regexp)
+              if from_match_data = self.from.match(path)
+                computed_to = self.to.dup
+                (from_match_data.size - 1).downto(1) do |num|
+                  computed_to.gsub!("$#{num}", from_match_data[num])
+                end
+                return computed_to
               end
-              return computed_to
             end
           end
           self.to

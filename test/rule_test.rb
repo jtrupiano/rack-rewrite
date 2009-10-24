@@ -1,4 +1,4 @@
-require 'test_helper'
+require File.join(File.dirname(__FILE__), 'test_helper')
 
 class RuleTest < Test::Unit::TestCase
 
@@ -108,6 +108,16 @@ class RuleTest < Test::Unit::TestCase
       # regexp to reverse 10 characters
       rule = Rack::Rewrite::Rule.new(:rewrite, %r{(\w)(\w)(\w)(\w)(\w)(\w)(\w)(\w)(\w)(\w)}, '$10$9$8$7$6$5$4$3$2$1')
       assert_equal 'jihgfedcba', rule.send(:interpret_to, "abcdefghij")
+    end
+
+    should 'call to with from when it is a lambda' do
+      rule = Rack::Rewrite::Rule.new(:rewrite, 'a', lambda { |from| from * 2 })
+      assert_equal 'aa', rule.send(:interpret_to, 'a')
+    end
+
+    should 'call to with from match data' do
+      rule = Rack::Rewrite::Rule.new(:rewrite, %r{/person_(\d+)(.*)}, lambda {|match| "people-#{match[1].to_i * 3}#{match[2]}"})
+      assert_equal 'people-3?show_bio=1', rule.send(:interpret_to, '/person_1?show_bio=1')
     end
   end
 end
