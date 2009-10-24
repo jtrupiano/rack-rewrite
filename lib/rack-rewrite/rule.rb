@@ -81,27 +81,33 @@ module Rack
       end
       
       private
-        # is there a better way to do this?
         def interpret_to(path) #:nodoc:
-          if self.to.is_a?(Proc)
-            if self.from.is_a?(Regexp)
-              return self.to.call(self.from.match(path))
-            else
-              return self.to.call(self.from)
-            end
-          else
-            if self.from.is_a?(Regexp)
-              if from_match_data = self.from.match(path)
-                computed_to = self.to.dup
-                (from_match_data.size - 1).downto(1) do |num|
-                  computed_to.gsub!("$#{num}", from_match_data[num])
-                end
-                return computed_to
-              end
-            end
-          end
+          return interpret_to_proc(path) if self.to.is_a?(Proc)
+          return computed_to(path) if compute_to?(path)
           self.to
         end
-    end 
-  end
+
+        def compute_to?(path)
+          self.from.is_a?(Regexp) && match(path)
+        end
+
+        def match(path) 
+          self.from.match(path)
+        end
+
+        def computed_to(path)
+          # is there a better way to do this?
+          computed_to = self.to.dup
+          (match(path).size - 1).downto(1) do |num|
+            computed_to.gsub!("$#{num}", match(path)[num])
+          end
+          return computed_to
+        end
+
+        def interpret_to_proc(path)
+          return self.to.call(match(path)) if self.from.is_a?(Regexp)
+          self.to.call(self.from)
+        end
+    end
+end
 end
