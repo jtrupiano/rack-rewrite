@@ -3,6 +3,29 @@
 A rack middleware for defining and applying rewrite rules. In many cases you 
 can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 
+== Usage
+
+=== Sample rackup file
+  
+  gem 'rack-rewrite', '~> 0.1.3'
+  require 'rack-rewrite
+  use Rack::Rewrite do
+    rewrite '/wiki/John_Trupiano', '/john'
+    r301 '/wiki/Yair_Flicker', '/yair'
+    r302 '/wiki/Greg_Jastrab', '/greg'
+    r301 %r{/wiki/(\w+)_\w+}, '/$1'
+  end
+
+=== Sample usage in a rails app
+  config.gem 'rack-rewrite', '~> 0.1.3'
+  require 'rack-rewrite
+  config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
+    rewrite '/wiki/John_Trupiano', '/john'
+    r301 '/wiki/Yair_Flicker', '/yair'
+    r302 '/wiki/Greg_Jastrab', '/greg'
+    r301 %r{/wiki/(\w+)_\w+}, '/$1'
+  end
+
 == Use Cases
 
 === Rebuild of existing site in a new technology
@@ -58,27 +81,6 @@ you can get away with this:
   r301 /(.*)$(?<!css|png|jpg)/, '/system/maintenance.html', :if => Proc.new { |from|
     File.exists?(File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html'))
   }
-
-== Sample rackup file
-  
-  gem 'rack-rewrite', '~> 0.1.3'
-  require 'rack-rewrite
-  use Rack::Rewrite do
-    rewrite '/wiki/John_Trupiano', '/john'
-    r301 '/wiki/Yair_Flicker', '/yair'
-    r302 '/wiki/Greg_Jastrab', '/greg'
-    r301 %r{/wiki/(\w+)_\w+}, '/$1'
-  end
-
-== Sample usage in a rails app
-  config.gem 'rack-rewrite', '~> 0.1.3'
-  require 'rack-rewrite
-  config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
-    rewrite '/wiki/John_Trupiano', '/john'
-    r301 '/wiki/Yair_Flicker', '/yair'
-    r302 '/wiki/Greg_Jastrab', '/greg'
-    r301 %r{/wiki/(\w+)_\w+}, '/$1'
-  end
   
 == Rewrite Rules
 
@@ -136,7 +138,7 @@ following example demonstrates how the presence of a maintenance page
 on the filesystem can be utilized to take your site(s) offline.
 
   r302 /.*/, "/system/maintenance.html", 
-    :if => { File.exists?(File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')) }
+    :if => Proc.new { File.exists?(File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')) }
 
 === Arbitrary Rewriting
 
