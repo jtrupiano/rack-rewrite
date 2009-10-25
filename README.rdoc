@@ -99,6 +99,16 @@ capture group and substitution pattern in your rewrite rule to achieve this.
 This rule will store the querystring in a capture group (via '(?.*)' ) and
 will substitute the querystring back into the rewritten URL (via $1).
 
+=== Arbitrary Rewriting
+
+All rules support passing a Proc as the second argument allowing you to
+perform arbitrary rewrites.  The following rule will rewrite all requests
+received between 12AM and 8AM to an unavailable page.
+
+  rewrite %r{(.*)}, lambda { |match|
+    Time.now.hour < 8 ? "/unavailable.html" : match[1]
+  }
+  
 == Copyright
 
 Copyright (c) 2009 John Trupiano. See LICENSE for details.

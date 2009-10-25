@@ -1,0 +1,11 @@
+=== 0.1.3 / unreleased
+
+* API
+  * Allow Proc's to be be passed as the 'to' argument to rule declarations
+
+=== 0.1.2 / 2009-10-13
+
+* Initial Feature Set
+  * :r301, :r302 and :redirect are supported in the rewrite DSL
+  * Regex matching/substitution patterns supported in rules
+    
