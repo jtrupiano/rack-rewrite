@@ -87,6 +87,11 @@ module Rack
           self.to
         end
 
+        def interpret_to_proc(path)
+          return self.to.call(match(path)) if self.from.is_a?(Regexp)
+          self.to.call(self.from)
+        end
+
         def compute_to?(path)
           self.from.is_a?(Regexp) && match(path)
         end
@@ -103,11 +108,6 @@ module Rack
           end
           return computed_to
         end
-
-        def interpret_to_proc(path)
-          return self.to.call(match(path)) if self.from.is_a?(Regexp)
-          self.to.call(self.from)
-        end
     end
-end
+  end
 end
