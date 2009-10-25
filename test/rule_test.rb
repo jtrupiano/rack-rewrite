@@ -143,7 +143,7 @@ class RuleTest < Test::Unit::TestCase
     
     # context 'Given the negative look-behind regular expression version of the capistrano maintenance.html rewrite rule given in our README' do
     #   setup do
-    #     @rule = Rack::Rewrite::Rule.new(:rewrite, /(.+)\.(?!css|jpg|png)|([^\.]*)/, '/system/maintenance.html', lambda { |from|
+    #     @rule = Rack::Rewrite::Rule.new(:rewrite, /(.*)$(?<!css|png|jpg)/, '/system/maintenance.html', lambda { |from|
     #       File.exists?(File.join('public', 'system', 'maintenance.html'))
     #     })
     #   end
