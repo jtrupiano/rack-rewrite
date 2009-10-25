@@ -2,7 +2,11 @@
 
 * API
   * Allow Proc's to be be passed as the 'to' argument to rule declarations
+  * Introduce rule guard support using :if => Proc.new option.
 
+* Documentation
+  * Add examples for writing capistrano maintenance page rewrite rules
+  
 === 0.1.2 / 2009-10-13
 
 * Initial Feature Set

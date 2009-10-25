@@ -30,9 +30,38 @@ to these routes and keep your routes.rb clean.
 
   rewrite %r{/features(.*)}, '/facial_features$1'
 
+=== Site Maintenance
+
+Most capistrano users will be familiar with the following Apache rewrite rules:
+
+  RewriteCond %{REQUEST_URI} !\.(css|jpg|png)$
+  RewriteCond %{DOCUMENT_ROOT}/system/maintenance.html -f
+  RewriteCond %{SCRIPT_FILENAME} !maintenance.html
+  RewriteRule ^.*$ /system/maintenance.html [L]
+
+This rewrite rule says to render a maintenance page for all non-asset requests
+if the maintenance file exists.  In capistrano, you can quickly upload a 
+maintenance file using:
+
+  cap deploy:web:disable REASON=upgrade UNTIL=12:30PM
+  
+We can replace the mod_rewrite rules with the following Rack::Rewrite rule:
+
+  r301 /.*/, '/system/maintenance.html', :if => Proc.new { |from|
+    maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
+    File.exists?(maintenance_file) && !%w(css jpg png).any? {|ext| Regexp.new("\.#{ext}$")}
+  }
+
+For those who have oniguruma compiled into their ruby installation (the default for 1.9),
+you can get away with this:
+
+  r301 /(.*)$(?<!css|png|jpg)/, '/system/maintenance.html', :if => Proc.new { |from|
+    File.exists?(File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html'))
+  }
+
 == Sample rackup file
   
-  gem 'rack-rewrite', '~> 0.1.2'
+  gem 'rack-rewrite', '~> 0.1.3'
   require 'rack-rewrite
   use Rack::Rewrite do
     rewrite '/wiki/John_Trupiano', '/john'
@@ -42,7 +71,7 @@ to these routes and keep your routes.rb clean.
   end
 
 == Sample usage in a rails app
-  config.gem 'rack-rewrite', '~> 0.1.2'
+  config.gem 'rack-rewrite', '~> 0.1.3'
   require 'rack-rewrite
   config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
     rewrite '/wiki/John_Trupiano', '/john'
@@ -98,6 +127,16 @@ capture group and substitution pattern in your rewrite rule to achieve this.
   
 This rule will store the querystring in a capture group (via '(?.*)' ) and
 will substitute the querystring back into the rewritten URL (via $1).
+
+=== Rule Guards
+
+All rules support passing guards as Procs/lambdas.  Guards simply return
+true or false indicating whether the rule declaration is a match.  The
+following example demonstrates how the presence of a maintenance page
+on the filesystem can be utilized to take your site(s) offline.
+
+  r302 /.*/, "/system/maintenance.html", 
+    :if => { File.exists?(File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')) }
 
 === Arbitrary Rewriting
 
