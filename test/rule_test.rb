@@ -1,7 +1,20 @@
 require File.join(File.dirname(__FILE__), 'test_helper')
 
 class RuleTest < Test::Unit::TestCase
+  
+  def self.should_pass_maintenance_tests
+    context 'and the maintenance file does in fact exist' do
+      setup { File.stubs(:exists?).returns(true) }
 
+      should('match for the root')              { assert @rule.matches?('/') }
+      should('match for a regular rails route') { assert @rule.matches?('/users/1') }
+      should('match for an html page')          { assert @rule.matches?('/index.html') }
+      should('not match for a css file')        { assert !@rule.matches?('/stylesheets/style.css') }
+      should('not match for a jpg file')        { assert !@rule.matches?('/images/sls.jpg') }
+      should('not match for a png file')        { assert !@rule.matches?('/images/sls.png') }
+    end
+  end
+  
   context '#Rule#apply' do
     should 'set Location header to result of #interpret_to for a 301' do
       rule = Rack::Rewrite::Rule.new(:r301, %r{/abc}, '/def')
@@ -86,6 +99,56 @@ class RuleTest < Test::Unit::TestCase
         assert @rule.matches?('/features/1?hide_bio=1')
       end
     end
+    
+    context 'Given a rule with a guard that checks for the presence of a file' do
+      setup do
+        @rule = Rack::Rewrite::Rule.new(:rewrite, %r{(.)*}, '/maintenance.html', lambda { 
+          File.exists?('maintenance.html')
+        })
+      end
+      
+      context 'when the file exists' do
+        setup do
+          File.stubs(:exists?).returns(true)
+        end
+        
+        should 'match' do
+          assert @rule.matches?('/anything/should/match')
+        end
+      end
+      
+      context 'when the file does not exist' do
+        setup do
+          File.stubs(:exists?).returns(false)
+        end
+        
+        should 'not match' do
+          assert !@rule.matches?('/nothing/should/match')
+        end
+      end
+    end
+    
+    context 'Given the capistrano maintenance.html rewrite rule given in our README' do
+      setup do
+        @rule = Rack::Rewrite::Rule.new(:rewrite, /.*/, '/system/maintenance.html', lambda { |from|
+          maintenance_file = File.join('system', 'maintenance.html')
+          File.exists?(maintenance_file) && !%w(css jpg png).any? {|ext| from =~ Regexp.new("\.#{ext}$")}
+        })
+      end
+      should_pass_maintenance_tests
+    end
+    
+    # TODO: conditionally define this test for ruby installations that use oniguruma as their regexp engine
+    #       checking for 1.9.x is simple, but how to check if a 1.8.x installation has oniguruma?
+    
+    # context 'Given the negative look-behind regular expression version of the capistrano maintenance.html rewrite rule given in our README' do
+    #   setup do
+    #     @rule = Rack::Rewrite::Rule.new(:rewrite, /(.+)\.(?!css|jpg|png)|([^\.]*)/, '/system/maintenance.html', lambda { |from|
+    #       File.exists?(File.join('public', 'system', 'maintenance.html'))
+    #     })
+    #   end
+    #   should_pass_maintenance_tests
+    # end
   end
   
   context 'Rule#interpret_to' do
@@ -120,4 +183,5 @@ class RuleTest < Test::Unit::TestCase
       assert_equal 'people-3?show_bio=1', rule.send(:interpret_to, '/person_1?show_bio=1')
     end
   end
+  
 end

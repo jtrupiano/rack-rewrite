@@ -15,36 +15,41 @@ module Rack
         # user's browser will continue to show the initially requested URL.
         # 
         #  rewrite '/wiki/John_Trupiano', '/john'
-        #  rewrite %r{/wiki/(\w+)_\w+}, '/$1'        
-        def rewrite(from, to)
-          @rules << Rule.new(:rewrite, from, to)
+        #  rewrite %r{/wiki/(\w+)_\w+}, '/$1'
+        #  rewrite %r{(.*)}, '/maintenance.html', :if => lambda { File.exists?('maintenance.html') }
+        def rewrite(from, to, *args)
+          options = args.last.is_a?(Hash) ? args.last : {}
+          @rules << Rule.new(:rewrite, from, to, options[:if])
         end
         
         # Creates a redirect rule that will send a 301 when matching.
         #
         #  r301 '/wiki/John_Trupiano', '/john'
         #  r301 '/contact-us.php', '/contact-us'
-        def r301(from, to)
-          @rules << Rule.new(:r301, from, to)
+        def r301(from, to, *args)
+          options = args.last.is_a?(Hash) ? args.last : {}
+          @rules << Rule.new(:r301, from, to, options[:if])
         end
         
         # Creates a redirect rule that will send a 302 when matching.
         #
         #  r302 '/wiki/John_Trupiano', '/john'
         #  r302 '/wiki/(.*)', 'http://www.google.com/?q=$1'
-        def r302(from, to)
-          @rules << Rule.new(:r302, from, to)
+        def r302(from, to, *args)
+          options = args.last.is_a?(Hash) ? args.last : {}
+          @rules << Rule.new(:r302, from, to, options[:if])
         end
     end
 
     # TODO: Break rules into subclasses
     class Rule #:nodoc:
-      attr_reader :rule_type, :from, :to
-      def initialize(rule_type, from, to) #:nodoc:
-        @rule_type, @from, @to = rule_type, from, to
+      attr_reader :rule_type, :from, :to, :guard
+      def initialize(rule_type, from, to, guard=nil) #:nodoc:
+        @rule_type, @from, @to, @guard = rule_type, from, to, guard
       end
 
       def matches?(path) #:nodoc:
+        return false if !guard.nil? && !guard.call(path)
         case self.from
         when Regexp
           path =~ self.from
