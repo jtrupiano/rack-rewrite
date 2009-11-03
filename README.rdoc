@@ -146,9 +146,20 @@ All rules support passing a Proc as the second argument allowing you to
 perform arbitrary rewrites.  The following rule will rewrite all requests
 received between 12AM and 8AM to an unavailable page.
 
-  rewrite %r{(.*)}, lambda { |match|
+  rewrite %r{(.*)}, lambda { |match, rack_env|
     Time.now.hour < 8 ? "/unavailable.html" : match[1]
   }
+  
+Note also that the rack environment is yielded to the lambda.  The 
+following redirect rule will send all visitors coming from a 
+
+rewrite %r{(.*)}, lambda { |match, rack_env|
+  if rack_env['HTTP_REFERER'] =~ /microsoft\.com/
+    
+  Time.now.hour < 8 ? "/unavailable.html" : match[1]
+}
+
+
   
 == Copyright
 

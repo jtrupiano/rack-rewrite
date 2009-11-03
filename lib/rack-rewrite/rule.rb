@@ -63,7 +63,7 @@ module Rack
       # Either (a) return a Rack response (short-circuiting the Rack stack), or
       # (b) alter env as necessary and return true
       def apply!(env) #:nodoc:
-        interpreted_to = self.send(:interpret_to, env['REQUEST_URI'])
+        interpreted_to = self.send(:interpret_to, env['REQUEST_URI'], env)
         case self.rule_type
         when :r301
           [301, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, ['Redirecting...']]
@@ -86,15 +86,15 @@ module Rack
       end
       
       private
-        def interpret_to(path) #:nodoc:
-          return interpret_to_proc(path) if self.to.is_a?(Proc)
+        def interpret_to(path, env={}) #:nodoc:
+          return interpret_to_proc(path, env) if self.to.is_a?(Proc)
           return computed_to(path) if compute_to?(path)
           self.to
         end
 
-        def interpret_to_proc(path)
-          return self.to.call(match(path)) if self.from.is_a?(Regexp)
-          self.to.call(self.from)
+        def interpret_to_proc(path, env)
+          return self.to.call(match(path), env) if self.from.is_a?(Regexp)
+          self.to.call(self.from, env)
         end
 
         def compute_to?(path)

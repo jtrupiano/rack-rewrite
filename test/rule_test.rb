@@ -138,16 +138,15 @@ class RuleTest < Test::Unit::TestCase
       should_pass_maintenance_tests
     end
     
-    # TODO: conditionally define this test for ruby installations that use oniguruma as their regexp engine
-    #       checking for 1.9.x is simple, but how to check if a 1.8.x installation has oniguruma?
-    
-    # context 'Given the negative look-behind regular expression version of the capistrano maintenance.html rewrite rule given in our README' do
-    #   setup do
-    #     @rule = Rack::Rewrite::Rule.new(:rewrite, /(.*)$(?<!css|png|jpg)/, '/system/maintenance.html', lambda { |from|
-    #       File.exists?(File.join('public', 'system', 'maintenance.html'))
-    #     })
+    # if RUBY_VERSION =~ /^1\.9/ || Object.const_defined?(:Oniguruma)
+    #   context 'Given the negative look-behind regular expression version of the capistrano maintenance.html rewrite rule given in our README' do
+    #     setup do
+    #       @rule = Rack::Rewrite::Rule.new(:rewrite, /(.*)$(?<!css|png|jpg)/, '/system/maintenance.html', lambda { |from|
+    #         File.exists?(File.join('public', 'system', 'maintenance.html'))
+    #       })
+    #     end
+    #     should_pass_maintenance_tests
     #   end
-    #   should_pass_maintenance_tests
     # end
   end
   
@@ -174,12 +173,12 @@ class RuleTest < Test::Unit::TestCase
     end
 
     should 'call to with from when it is a lambda' do
-      rule = Rack::Rewrite::Rule.new(:rewrite, 'a', lambda { |from| from * 2 })
+      rule = Rack::Rewrite::Rule.new(:rewrite, 'a', lambda { |from, env| from * 2 })
       assert_equal 'aa', rule.send(:interpret_to, 'a')
     end
 
     should 'call to with from match data' do
-      rule = Rack::Rewrite::Rule.new(:rewrite, %r{/person_(\d+)(.*)}, lambda {|match| "people-#{match[1].to_i * 3}#{match[2]}"})
+      rule = Rack::Rewrite::Rule.new(:rewrite, %r{/person_(\d+)(.*)}, lambda {|match, env| "people-#{match[1].to_i * 3}#{match[2]}"})
       assert_equal 'people-3?show_bio=1', rule.send(:interpret_to, '/person_1?show_bio=1')
     end
   end
