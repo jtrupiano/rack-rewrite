@@ -50,10 +50,9 @@ module Rack
 
       def matches?(path) #:nodoc:
         return false if !guard.nil? && !guard.call(path)
-        case self.from
-        when Regexp
+        if self.from.is_a?(Regexp) || (Object.const_defined?(:Oniguruma) && self.from.is_a?(Oniguruma::ORegexp))
           path =~ self.from
-        when String
+        elsif self.from.is_a?(String)
           path == self.from
         else
           false

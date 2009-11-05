@@ -16,6 +16,9 @@ class RuleTest < Test::Unit::TestCase
   end
   
   def self.negative_lookahead_supported?
+    begin
+      require 'oniguruma'
+    rescue LoadError; end
     RUBY_VERSION =~ /^1\.9/ || Object.const_defined?(:Oniguruma)
   end
   
@@ -152,7 +155,7 @@ class RuleTest < Test::Unit::TestCase
     end
     
     if negative_lookahead_supported?
-      context 'Given the negative look-behind regular expression version of the capistrano maintenance.html rewrite rule given in our README' do
+      context 'Given the negative lookahead regular expression version of the capistrano maintenance.html rewrite rule given in our README' do
         setup do
           @rule = Rack::Rewrite::Rule.new(:rewrite, negative_lookahead_regexp, '/system/maintenance.html', lambda { |from|
             File.exists?(File.join('public', 'system', 'maintenance.html'))
