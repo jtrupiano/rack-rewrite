@@ -15,6 +15,19 @@ class RuleTest < Test::Unit::TestCase
     end
   end
   
+  def self.negative_lookahead_supported?
+    RUBY_VERSION =~ /^1\.9/ || Object.const_defined?(:Oniguruma)
+  end
+  
+  def negative_lookahead_regexp
+    if RUBY_VERSION =~ /^1\.9/
+      # have to use the constructor instead of the literal syntax b/c load errors occur in Ruby 1.8
+      Regexp.new("(.*)$(?<!css|png|jpg)")
+    else
+      Oniguruma::ORegexp.new("(.*)$(?<!css|png|jpg)")
+    end
+  end
+  
   context '#Rule#apply' do
     should 'set Location header to result of #interpret_to for a 301' do
       rule = Rack::Rewrite::Rule.new(:r301, %r{/abc}, '/def')
@@ -138,16 +151,16 @@ class RuleTest < Test::Unit::TestCase
       should_pass_maintenance_tests
     end
     
-    # if RUBY_VERSION =~ /^1\.9/ || Object.const_defined?(:Oniguruma)
-    #   context 'Given the negative look-behind regular expression version of the capistrano maintenance.html rewrite rule given in our README' do
-    #     setup do
-    #       @rule = Rack::Rewrite::Rule.new(:rewrite, /(.*)$(?<!css|png|jpg)/, '/system/maintenance.html', lambda { |from|
-    #         File.exists?(File.join('public', 'system', 'maintenance.html'))
-    #       })
-    #     end
-    #     should_pass_maintenance_tests
-    #   end
-    # end
+    if negative_lookahead_supported?
+      context 'Given the negative look-behind regular expression version of the capistrano maintenance.html rewrite rule given in our README' do
+        setup do
+          @rule = Rack::Rewrite::Rule.new(:rewrite, negative_lookahead_regexp, '/system/maintenance.html', lambda { |from|
+            File.exists?(File.join('public', 'system', 'maintenance.html'))
+          })
+        end
+        should_pass_maintenance_tests
+      end
+    end
   end
   
   context 'Rule#interpret_to' do
