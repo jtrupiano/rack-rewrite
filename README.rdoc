@@ -75,13 +75,19 @@ We can replace the mod_rewrite rules with the following Rack::Rewrite rule:
     File.exists?(maintenance_file) && !%w(css jpg png).any? {|ext| Regexp.new("\.#{ext}$")}
   }
 
-For those who have oniguruma compiled into their ruby installation (the default for 1.9),
-you can get away with this:
+If you're running Ruby 1.9, this rule is highly simplified:
 
   r301 /(.*)$(?<!css|png|jpg)/, '/system/maintenance.html', :if => Proc.new { |from|
     File.exists?(File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html'))
   }
-  
+
+For those using the oniguruma gem with their ruby 1.8 installation, you can 
+get away with this:
+
+  r301 Oniguruma::ORegexp.new("(.*)$(?<!css|png|jpg)"), '/system/maintenance.html', :if => Proc.new { |from|
+    File.exists?(File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html'))
+  }
+
 == Rewrite Rules
 
 === :rewrite
