@@ -8,14 +8,7 @@
 * Documentation
   * Add example of writing capistrano maintenance page rewrite rules
   * Add examples of rule guards and arbitrary rewriting
-  * Add examples of :send_file and :x_send_file rules
-  
-=== 0.1.2 / 2009-10-13
-
-* Initial Feature Set
-  * :r301, :r302 and :redirect are supported in the rewrite DSL
-  * Regex matching/substitution patterns supported in rules
-    
+  * Add examples of :send_file and :x_send_file rules    
 
 === 0.1.3 / 2009-11-14
 * Maintenance
@@ -23,7 +16,8 @@
 * Documentation
   * Add HISTORY.rdoc
   
-=== 0.1.2 / 2009-10-15
-* API
-  * rewrite, r301 and r302 rules
-  * regular expression matching and substitution rules
+=== 0.1.2 / 2009-10-13
+
+* Initial Feature Set
+  * :r301, :r302 and :redirect are supported in the rewrite DSL
+  * Regex matching/substitution patterns supported in rules
