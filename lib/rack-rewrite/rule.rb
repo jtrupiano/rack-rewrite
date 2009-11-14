@@ -61,9 +61,9 @@ module Rack
         interpreted_to = self.send(:interpret_to, env['REQUEST_URI'])
         case self.rule_type
         when :r301
-          [301, {'Location' => interpreted_to}, ['Redirecting...']]
+          [301, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, ['Redirecting...']]
         when :r302
-          [302, {'Location' => interpreted_to}, ['Redirecting...']]
+          [302, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, ['Redirecting...']]
         when :rewrite
           # return [200, {}, {:content => env.inspect}]
           env['REQUEST_URI'] = interpreted_to

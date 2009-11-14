@@ -32,6 +32,14 @@ class RuleTest < Test::Unit::TestCase
       assert_equal 'bio=1', env['QUERYSTRING']
       assert_equal '/john?bio=1', env['REQUEST_URI']
     end
+
+    should 'set Content-Type header to text/html for a 301 and 302' do
+      [:r301, :r302].each do |rule_type|
+        rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def')
+        env = {'PATH_INFO' => '/abc'}
+        assert_equal 'text/html', rule.apply!(env)[1]['Content-Type']
+      end
+    end
   end
   
   context 'Rule#matches' do
