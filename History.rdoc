@@ -1,3 +1,22 @@
+=== 0.2.0 / 2009-11-14
+* API
+  * Allow Proc's to be be passed as the 'to' argument to rule declarations
+  * Introduce rule guard support using :if => Proc.new option.
+  * :send_file and :x_send_file rules
+  * proxy rack_env to rule guards for arbitrary rule writing
+
+* Documentation
+  * Add example of writing capistrano maintenance page rewrite rules
+  * Add examples of rule guards and arbitrary rewriting
+  * Add examples of :send_file and :x_send_file rules
+  
+=== 0.1.2 / 2009-10-13
+
+* Initial Feature Set
+  * :r301, :r302 and :redirect are supported in the rewrite DSL
+  * Regex matching/substitution patterns supported in rules
+    
+
 === 0.1.3 / 2009-11-14
 * Maintenance
   * Ensure Content-Type header is set for 301's and 302's (thanks to Sebastian Röbke)
