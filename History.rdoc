@@ -1,0 +1,10 @@
+=== 0.1.3 / 2009-11-14
+* Maintenance
+  * Ensure Content-Type header is set for 301's and 302's (thanks to Sebastian Röbke)
+* Documentation
+  * Add HISTORY.rdoc
+  
+=== 0.1.2 / 2009-10-15
+* API
+  * rewrite, r301 and r302 rules
+  * regular expression matching and substitution rules

@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
     ".document",
      ".gitignore",
      "HISTORY.rdoc",
+     "History.rdoc",
      "LICENSE",
      "README.rdoc",
      "Rakefile",
@@ -28,6 +29,7 @@ Gem::Specification.new do |s|
      "lib/rack-rewrite.rb",
      "lib/rack-rewrite/rule.rb",
      "rack-rewrite.gemspec",
+     "test/geminstaller.yml",
      "test/rack-rewrite_test.rb",
      "test/rule_test.rb",
      "test/test_helper.rb"

@@ -11,3 +11,5 @@ require 'rack-rewrite'
 
 class Test::Unit::TestCase
 end
+
+TEST_ROOT = File.dirname(__FILE__)

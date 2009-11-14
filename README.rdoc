@@ -3,6 +3,29 @@
 A rack middleware for defining and applying rewrite rules. In many cases you 
 can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 
+== Usage
+
+=== Sample rackup file
+  
+  gem 'rack-rewrite', '~> 0.1.3'
+  require 'rack-rewrite
+  use Rack::Rewrite do
+    rewrite '/wiki/John_Trupiano', '/john'
+    r301 '/wiki/Yair_Flicker', '/yair'
+    r302 '/wiki/Greg_Jastrab', '/greg'
+    r301 %r{/wiki/(\w+)_\w+}, '/$1'
+  end
+
+=== Sample usage in a rails app
+  config.gem 'rack-rewrite', '~> 0.1.3'
+  require 'rack-rewrite
+  config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
+    rewrite '/wiki/John_Trupiano', '/john'
+    r301 '/wiki/Yair_Flicker', '/yair'
+    r302 '/wiki/Greg_Jastrab', '/greg'
+    r301 %r{/wiki/(\w+)_\w+}, '/$1'
+  end
+
 == Use Cases
 
 === Rebuild of existing site in a new technology
@@ -30,27 +53,49 @@ to these routes and keep your routes.rb clean.
 
   rewrite %r{/features(.*)}, '/facial_features$1'
 
-== Sample rackup file
-  
-  gem 'rack-rewrite', '~> 0.1.2'
-  require 'rack-rewrite
-  use Rack::Rewrite do
-    rewrite '/wiki/John_Trupiano', '/john'
-    r301 '/wiki/Yair_Flicker', '/yair'
-    r302 '/wiki/Greg_Jastrab', '/greg'
-    r301 %r{/wiki/(\w+)_\w+}, '/$1'
-  end
+=== Site Maintenance
 
-== Sample usage in a rails app
-  config.gem 'rack-rewrite', '~> 0.1.2'
-  require 'rack-rewrite
-  config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
-    rewrite '/wiki/John_Trupiano', '/john'
-    r301 '/wiki/Yair_Flicker', '/yair'
-    r302 '/wiki/Greg_Jastrab', '/greg'
-    r301 %r{/wiki/(\w+)_\w+}, '/$1'
-  end
+Most capistrano users will be familiar with the following Apache rewrite rules:
+
+  RewriteCond %{REQUEST_URI} !\.(css|jpg|png)$
+  RewriteCond %{DOCUMENT_ROOT}/system/maintenance.html -f
+  RewriteCond %{SCRIPT_FILENAME} !maintenance.html
+  RewriteRule ^.*$ /system/maintenance.html [L]
+
+This rewrite rule says to render a maintenance page for all non-asset requests
+if the maintenance file exists.  In capistrano, you can quickly upload a 
+maintenance file using:
+
+  cap deploy:web:disable REASON=upgrade UNTIL=12:30PM
   
+We can replace the mod_rewrite rules with the following Rack::Rewrite rule:
+
+  maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
+  send_file /.*/, maintenance_file, :if => Proc.new { |rack_env|
+    File.exists?(maintenance_file) && !%w(css jpg png).any? {|ext| maintenance_file =~ Regexp.new("\.#{ext}$")}
+  }
+
+If you're running Ruby 1.9, this rule is highly simplified:
+
+  maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
+  send_file /(.*)$(?<!css|png|jpg)/, maintenance_file, :if => Proc.new { |rack_env|
+    File.exists?(maintenance_file)
+  }
+
+For those using the oniguruma gem with their ruby 1.8 installation, you can 
+get away with this:
+
+  maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
+  send_file Oniguruma::ORegexp.new("(.*)$(?<!css|png|jpg)"), maintenace_file, :if => Proc.new { |rack_env|
+    File.exists?(maintenance_file)
+  }
+
+NOTE: These replacement rules actually issue redirects.  The apache config
+snippet referenced above actually performs a rewrite.  With Rack::Rewrite
+we currently have to issue a redirect because rails will not recognize the
+maintenance route.  If you have any ideas on how to fix this, I would love
+to discuss it with you.
+
 == Rewrite Rules
 
 === :rewrite
@@ -86,6 +131,19 @@ Recall that rules are interpreted from top to bottom.  So you can install
 "default" rewrite rules if you like.  [2] is a sample default rule that
 will redirect all other requests to the wiki to a google search.
 
+=== :send_file, :x_send_file
+
+Calls to #send_file and #x_send_file also have the same signature as #rewrite.
+If the rule matches, the 'to' parameter is interpreted as a path to a file
+to be rendered instead of passing the application call up the rack stack.
+
+  send_file /*/, 'public/spammers.htm', :if => Proc.new { |rack_env|
+    rack_env['HTTP_REFERER'] =~ 'spammers.com'
+  }
+  x_send_file /^blog\/.*/, 'public/blog_offline.htm', :if => Proc.new { |rack_env|
+    File.exists?('public/blog_offline.htm')
+  }
+
 == Tips
 
 === Keeping your querystring
@@ -99,6 +157,39 @@ capture group and substitution pattern in your rewrite rule to achieve this.
 This rule will store the querystring in a capture group (via '(?.*)' ) and
 will substitute the querystring back into the rewritten URL (via $1).
 
+=== Rule Guards
+
+All rules support passing guards as Procs/lambdas.  Guards simply return
+true or false indicating whether the rule declaration is a match.  The
+following example demonstrates how the presence of a maintenance page
+on the filesystem can be utilized to take your site(s) offline.
+
+  maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
+  x_send_file /.*/, maintenance_file, :if => Proc.new { |rack_env| 
+    File.exists?(maintenance_file)
+  }
+
+=== Arbitrary Rewriting
+
+All rules support passing a Proc as the second argument allowing you to
+perform arbitrary rewrites.  The following rule will rewrite all requests
+received between 12AM and 8AM to an unavailable page.
+
+  rewrite %r{(.*)}, lambda { |match, rack_env|
+    Time.now.hour < 8 ? "/unavailable.html" : match[1]
+  }
+  
+Note also that the rack environment is yielded to the lambda.  The 
+following redirect rule will send all visitors coming from a 
+
+rewrite %r{(.*)}, lambda { |match, rack_env|
+  if rack_env['HTTP_REFERER'] =~ /microsoft\.com/
+    
+  Time.now.hour < 8 ? "/unavailable.html" : match[1]
+}
+
+
+  
 == Copyright
 
 Copyright (c) 2009 John Trupiano. See LICENSE for details.

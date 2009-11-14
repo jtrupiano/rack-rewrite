@@ -23,7 +23,7 @@ module Rack
         
     private
       def find_first_matching_rule(env) #:nodoc:
-        @rule_set.rules.detect { |rule| rule.matches?(env['REQUEST_URI']) }
+        @rule_set.rules.detect { |rule| rule.matches?(env) }
       end    
   end
 end
