@@ -90,12 +90,6 @@ get away with this:
     File.exists?(maintenance_file)
   }
 
-NOTE: These replacement rules actually issue redirects.  The apache config
-snippet referenced above actually performs a rewrite.  With Rack::Rewrite
-we currently have to issue a redirect because rails will not recognize the
-maintenance route.  If you have any ideas on how to fix this, I would love
-to discuss it with you.
-
 == Rewrite Rules
 
 === :rewrite
