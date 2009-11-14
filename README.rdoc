@@ -70,22 +70,24 @@ maintenance file using:
   
 We can replace the mod_rewrite rules with the following Rack::Rewrite rule:
 
-  r301 /.*/, '/system/maintenance.html', :if => Proc.new { |from|
-    maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
-    File.exists?(maintenance_file) && !%w(css jpg png).any? {|ext| Regexp.new("\.#{ext}$")}
+  maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
+  send_file /.*/, maintenance_file, :if => Proc.new { |rack_env|
+    File.exists?(maintenance_file) && !%w(css jpg png).any? {|ext| maintenance_file =~ Regexp.new("\.#{ext}$")}
   }
 
 If you're running Ruby 1.9, this rule is highly simplified:
 
-  r301 /(.*)$(?<!css|png|jpg)/, '/system/maintenance.html', :if => Proc.new { |from|
-    File.exists?(File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html'))
+  maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
+  send_file /(.*)$(?<!css|png|jpg)/, maintenance_file, :if => Proc.new { |rack_env|
+    File.exists?(maintenance_file)
   }
 
 For those using the oniguruma gem with their ruby 1.8 installation, you can 
 get away with this:
 
-  r301 Oniguruma::ORegexp.new("(.*)$(?<!css|png|jpg)"), '/system/maintenance.html', :if => Proc.new { |from|
-    File.exists?(File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html'))
+  maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
+  send_file Oniguruma::ORegexp.new("(.*)$(?<!css|png|jpg)"), maintenace_file, :if => Proc.new { |rack_env|
+    File.exists?(maintenance_file)
   }
 
 NOTE: These replacement rules actually issue redirects.  The apache config
@@ -129,6 +131,19 @@ Recall that rules are interpreted from top to bottom.  So you can install
 "default" rewrite rules if you like.  [2] is a sample default rule that
 will redirect all other requests to the wiki to a google search.
 
+=== :send_file, :x_send_file
+
+Calls to #send_file and #x_send_file also have the same signature as #rewrite.
+If the rule matches, the 'to' parameter is interpreted as a path to a file
+to be rendered instead of passing the application call up the rack stack.
+
+  send_file /*/, 'public/spammers.htm', :if => Proc.new { |rack_env|
+    rack_env['HTTP_REFERER'] =~ 'spammers.com'
+  }
+  x_send_file /^blog\/.*/, 'public/blog_offline.htm', :if => Proc.new { |rack_env|
+    File.exists?('public/blog_offline.htm')
+  }
+
 == Tips
 
 === Keeping your querystring
@@ -149,8 +164,10 @@ true or false indicating whether the rule declaration is a match.  The
 following example demonstrates how the presence of a maintenance page
 on the filesystem can be utilized to take your site(s) offline.
 
-  r302 /.*/, "/system/maintenance.html", 
-    :if => Proc.new { File.exists?(File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')) }
+  maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
+  x_send_file /.*/, maintenance_file, :if => Proc.new { |rack_env| 
+    File.exists?(maintenance_file)
+  }
 
 === Arbitrary Rewriting
 

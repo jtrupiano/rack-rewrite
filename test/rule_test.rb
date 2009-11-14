@@ -6,12 +6,12 @@ class RuleTest < Test::Unit::TestCase
     context 'and the maintenance file does in fact exist' do
       setup { File.stubs(:exists?).returns(true) }
 
-      should('match for the root')              { assert @rule.matches?('/') }
-      should('match for a regular rails route') { assert @rule.matches?('/users/1') }
-      should('match for an html page')          { assert @rule.matches?('/index.html') }
-      should('not match for a css file')        { assert !@rule.matches?('/stylesheets/style.css') }
-      should('not match for a jpg file')        { assert !@rule.matches?('/images/sls.jpg') }
-      should('not match for a png file')        { assert !@rule.matches?('/images/sls.png') }
+      should('match for the root')              { assert @rule.matches?({'REQUEST_URI' => '/'}) }
+      should('match for a regular rails route') { assert @rule.matches?({'REQUEST_URI' => '/users/1'}) }
+      should('match for an html page')          { assert @rule.matches?({'REQUEST_URI' => '/index.html'}) }
+      should('not match for a css file')        { assert !@rule.matches?({'REQUEST_URI' => '/stylesheets/style.css'}) }
+      should('not match for a jpg file')        { assert !@rule.matches?({'REQUEST_URI' => '/images/sls.jpg'}) }
+      should('not match for a png file')        { assert !@rule.matches?({'REQUEST_URI' => '/images/sls.png'}) }
     end
   end
   
@@ -69,6 +69,64 @@ class RuleTest < Test::Unit::TestCase
         assert_equal 'text/html', rule.apply!(env)[1]['Content-Type']
       end
     end
+    
+    context 'Given an :x_send_file rule that matches' do
+      setup do
+        @file = File.join(TEST_ROOT, 'geminstaller.yml')
+        @rule = Rack::Rewrite::Rule.new(:x_send_file, /.*/, @file)
+        env = {'PATH_INFO' => '/abc'}
+        @response = @rule.apply!(env)
+      end
+      
+      should 'return 200' do
+        assert_equal 200, @response[0]
+      end
+      
+      should 'return an X-Sendfile header' do
+        assert @response[1].has_key?('X-Sendfile')
+      end
+      
+      should 'return a Content-Type of text/yaml' do
+        assert_equal 'text/yaml', @response[1]['Content-Type']
+      end
+      
+      should 'return the proper Content-Length' do
+        assert_equal File.size(@file).to_s, @response[1]['Content-Length']
+      end
+      
+      should 'return empty content' do
+        assert_equal [], @response[2]
+      end
+    end
+    
+    context 'Given a :send_file rule that matches' do
+      setup do
+        @file = File.join(TEST_ROOT, 'geminstaller.yml')
+        @rule = Rack::Rewrite::Rule.new(:send_file, /.*/, @file)
+        env = {'PATH_INFO' => '/abc'}
+        @response = @rule.apply!(env)
+      end
+      
+      should 'return 200' do
+        assert_equal 200, @response[0]
+      end
+      
+      should 'not return an X-Sendfile header' do
+        assert !@response[1].has_key?('X-Sendfile')
+      end
+      
+      should 'return a Content-Type of text/yaml' do
+        assert_equal 'text/yaml', @response[1]['Content-Type']
+      end
+      
+      should 'return the proper Content-Length' do
+        assert_equal File.size(@file).to_s, @response[1]['Content-Length']
+      end
+      
+      should 'return the contents of geminstaller.yml' do
+        assert_equal File.read(@file), @response[2]
+      end
+    end
   end
   
   context 'Rule#matches' do
@@ -78,15 +136,15 @@ class RuleTest < Test::Unit::TestCase
       end
       
       should 'match PATH_INFO of /features' do
-        assert @rule.matches?("/features")
+        assert @rule.matches?({'REQUEST_URI' => "/features"})
       end
       
       should 'not match PATH_INFO of /features.xml' do
-        assert !@rule.matches?("/features.xml")
+        assert !@rule.matches?({'REQUEST_URI' => "/features.xml"})
       end
       
       should 'not match PATH_INFO of /my_features' do
-        assert !@rule.matches?("/my_features")
+        assert !@rule.matches?({'REQUEST_URI' => "/my_features"})
       end
     end
     
@@ -96,29 +154,29 @@ class RuleTest < Test::Unit::TestCase
       end
     
       should 'match PATH_INFO of /features' do
-        assert @rule.matches?("/features")
+        assert @rule.matches?({'REQUEST_URI' => "/features"})
       end
     
       should 'match PATH_INFO of /features.xml' do
-        assert @rule.matches?('/features.xml')
+        assert @rule.matches?({'REQUEST_URI' => '/features.xml'})
       end
     
       should 'match PATH_INFO of /features/1' do
-        assert @rule.matches?('/features/1')
+        assert @rule.matches?({'REQUEST_URI' => '/features/1'})
       end
     
       should 'match PATH_INFO of /features?filter_by=name' do
-        assert @rule.matches?('/features?filter_by_name=name')
+        assert @rule.matches?({'REQUEST_URI' => '/features?filter_by_name=name'})
       end
     
       should 'match PATH_INFO of /features/1?hide_bio=1' do
-        assert @rule.matches?('/features/1?hide_bio=1')
+        assert @rule.matches?({'REQUEST_URI' => '/features/1?hide_bio=1'})
       end
     end
     
     context 'Given a rule with a guard that checks for the presence of a file' do
       setup do
-        @rule = Rack::Rewrite::Rule.new(:rewrite, %r{(.)*}, '/maintenance.html', lambda { 
+        @rule = Rack::Rewrite::Rule.new(:rewrite, %r{(.)*}, '/maintenance.html', lambda { |rack_env|
           File.exists?('maintenance.html')
         })
       end
@@ -129,7 +187,7 @@ class RuleTest < Test::Unit::TestCase
         end
         
         should 'match' do
-          assert @rule.matches?('/anything/should/match')
+          assert @rule.matches?({'REQUEST_URI' => '/anything/should/match'})
         end
       end
       
@@ -139,16 +197,16 @@ class RuleTest < Test::Unit::TestCase
         end
         
         should 'not match' do
-          assert !@rule.matches?('/nothing/should/match')
+          assert !@rule.matches?({'REQUEST_URI' => '/nothing/should/match'})
         end
       end
     end
     
     context 'Given the capistrano maintenance.html rewrite rule given in our README' do
       setup do
-        @rule = Rack::Rewrite::Rule.new(:rewrite, /.*/, '/system/maintenance.html', lambda { |from|
+        @rule = Rack::Rewrite::Rule.new(:rewrite, /.*/, '/system/maintenance.html', lambda { |rack_env|
           maintenance_file = File.join('system', 'maintenance.html')
-          File.exists?(maintenance_file) && !%w(css jpg png).any? {|ext| from =~ Regexp.new("\.#{ext}$")}
+          File.exists?(maintenance_file) && !%w(css jpg png).any? {|ext| rack_env['REQUEST_URI'] =~ Regexp.new("\.#{ext}$")}
         })
       end
       should_pass_maintenance_tests
@@ -157,7 +215,7 @@ class RuleTest < Test::Unit::TestCase
     if negative_lookahead_supported?
       context 'Given the negative lookahead regular expression version of the capistrano maintenance.html rewrite rule given in our README' do
         setup do
-          @rule = Rack::Rewrite::Rule.new(:rewrite, negative_lookahead_regexp, '/system/maintenance.html', lambda { |from|
+          @rule = Rack::Rewrite::Rule.new(:rewrite, negative_lookahead_regexp, '/system/maintenance.html', lambda { |rack_env|
             File.exists?(File.join('public', 'system', 'maintenance.html'))
           })
         end

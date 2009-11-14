@@ -1,3 +1,5 @@
+require 'rack/mime'
+
 module Rack
   class Rewrite
     class RuleSet
@@ -39,6 +41,25 @@ module Rack
           options = args.last.is_a?(Hash) ? args.last : {}
           @rules << Rule.new(:r302, from, to, options[:if])
         end
+        
+        # Creates a rule that will render a file if matched.
+        #
+        #  send_file /*/, 'public/system/maintenance.html', 
+        #    :if => { File.exists?('public/system/maintenance.html') }
+        def send_file(from, to, *args)
+          options = args.last.is_a?(Hash) ? args.last : {}
+          @rules << Rule.new(:send_file, from, to, options[:if])          
+        end
+        
+        # Creates a rule that will render a file using x-send-file
+        # if matched.
+        #
+        #  x_send_file /*/, 'public/system/maintenance.html', 
+        #    :if => { File.exists?('public/system/maintenance.html') }
+        def x_send_file(from, to, *args)
+          options = args.last.is_a?(Hash) ? args.last : {}
+          @rules << Rule.new(:x_send_file, from, to, options[:if])
+        end        
     end
 
     # TODO: Break rules into subclasses
@@ -48,8 +69,9 @@ module Rack
         @rule_type, @from, @to, @guard = rule_type, from, to, guard
       end
 
-      def matches?(path) #:nodoc:
-        return false if !guard.nil? && !guard.call(path)
+      def matches?(rack_env) #:nodoc:
+        return false if !guard.nil? && !guard.call(rack_env)
+        path = rack_env['REQUEST_URI']
         if self.from.is_a?(Regexp) || (Object.const_defined?(:Oniguruma) && self.from.is_a?(Oniguruma::ORegexp))
           path =~ self.from
         elsif self.from.is_a?(String)
@@ -79,6 +101,17 @@ module Rack
             env['QUERYSTRING'] = ''
           end
           true
+        when :send_file
+          [200, {
+            'Content-Length' => ::File.size(interpreted_to).to_s,
+            'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
+            }, ::File.read(interpreted_to)]
+        when :x_send_file
+          [200, {
+            'X-Sendfile'     => interpreted_to,
+            'Content-Length' => ::File.size(interpreted_to).to_s,
+            'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
+            }, []]
         else
           raise Exception.new("Unsupported rule: #{self.rule_type}")
         end
