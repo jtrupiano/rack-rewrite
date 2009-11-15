@@ -45,7 +45,7 @@ module Rack
         # Creates a rule that will render a file if matched.
         #
         #  send_file /*/, 'public/system/maintenance.html', 
-        #    :if => { File.exists?('public/system/maintenance.html') }
+        #    :if => Proc.new { File.exists?('public/system/maintenance.html') }
         def send_file(from, to, *args)
           options = args.last.is_a?(Hash) ? args.last : {}
           @rules << Rule.new(:send_file, from, to, options[:if])          
@@ -55,7 +55,7 @@ module Rack
         # if matched.
         #
         #  x_send_file /*/, 'public/system/maintenance.html', 
-        #    :if => { File.exists?('public/system/maintenance.html') }
+        #    :if => Proc.new { File.exists?('public/system/maintenance.html') }
         def x_send_file(from, to, *args)
           options = args.last.is_a?(Hash) ? args.last : {}
           @rules << Rule.new(:x_send_file, from, to, options[:if])
