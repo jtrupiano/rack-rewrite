@@ -206,7 +206,7 @@ class RuleTest < Test::Unit::TestCase
       setup do
         @rule = Rack::Rewrite::Rule.new(:rewrite, /.*/, '/system/maintenance.html', lambda { |rack_env|
           maintenance_file = File.join('system', 'maintenance.html')
-          File.exists?(maintenance_file) && !%w(css jpg png).any? {|ext| rack_env['REQUEST_URI'] =~ Regexp.new("\.#{ext}$")}
+          File.exists?(maintenance_file) && rack_env['REQUEST_URI'] !~ /\.(css|jpg|png)/
         })
       end
       should_pass_maintenance_tests
