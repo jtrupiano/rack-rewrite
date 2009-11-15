@@ -86,7 +86,7 @@ For those using the oniguruma gem with their ruby 1.8 installation, you can
 get away with this:
 
   maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
-  send_file Oniguruma::ORegexp.new("(.*)$(?<!css|png|jpg)"), maintenace_file, :if => Proc.new { |rack_env|
+  send_file Oniguruma::ORegexp.new("(.*)$(?<!css|png|jpg)"), maintenance_file, :if => Proc.new { |rack_env|
     File.exists?(maintenance_file)
   }
 
