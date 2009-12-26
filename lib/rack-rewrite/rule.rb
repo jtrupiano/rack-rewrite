@@ -71,7 +71,7 @@ module Rack
 
       def matches?(rack_env) #:nodoc:
         return false if !guard.nil? && !guard.call(rack_env)
-        path = rack_env['REQUEST_URI']
+        path = rack_env['REQUEST_URI']==nil ? rack_env['PATH_INFO'] : rack_env['REQUEST_URI']
         if self.from.is_a?(Regexp) || (Object.const_defined?(:Oniguruma) && self.from.is_a?(Oniguruma::ORegexp))
           path =~ self.from
         elsif self.from.is_a?(String)
