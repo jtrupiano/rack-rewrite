@@ -1,4 +1,4 @@
-=== 0.2.1 / unreleased
+=== 0.2.1 / 2010-01-06
 * API
   * Implement $& substitution pattern (thanks to {Ben Brinckerhoff}[http://github.com/bhb])
   
