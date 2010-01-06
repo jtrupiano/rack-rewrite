@@ -5,6 +5,7 @@
 * Maintenance
   * Ignore empty captures instead of failing during subsitution (thanks to {Ben Brinckerhoff}[http://github.com/bhb])
   * Play nice with Rack::Test requests which only set PATH_INFO and not REQUEST_URI (thanks to {@docunext}[http://github.com/docunext])
+  * Use QUERY_STRING instead of QUERYSTRING as per Rack spec.  Closes Issue #1.
 
 === 0.2.0 / 2009-11-14
 * API
