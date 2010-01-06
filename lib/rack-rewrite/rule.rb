@@ -140,8 +140,9 @@ module Rack
         def computed_to(path)
           # is there a better way to do this?
           computed_to = self.to.dup
+          computed_to.gsub!("$&",match(path).to_s)
           (match(path).size - 1).downto(1) do |num|
-            computed_to.gsub!("$#{num}", match(path)[num])
+            computed_to.gsub!("$#{num}", match(path)[num].to_s)
           end
           return computed_to
         end

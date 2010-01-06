@@ -246,6 +246,16 @@ class RuleTest < Test::Unit::TestCase
       assert_equal 'jihgfedcba', rule.send(:interpret_to, "abcdefghij")
     end
 
+    should 'replace $& on a match' do
+      rule = Rack::Rewrite::Rule.new(:rewrite, %r{.*}, 'http://example.org$&')
+      assert_equal 'http://example.org/person/1', rule.send(:interpret_to, "/person/1")
+    end
+
+    should 'ignore empty captures' do
+      rule = Rack::Rewrite::Rule.new(:rewrite, %r{/person(_\d+)?}, '/people/$1')
+      assert_equal '/people/', rule.send(:interpret_to, "/person")
+    end
+
     should 'call to with from when it is a lambda' do
       rule = Rack::Rewrite::Rule.new(:rewrite, 'a', lambda { |from, env| from * 2 })
       assert_equal 'aa', rule.send(:interpret_to, 'a')
