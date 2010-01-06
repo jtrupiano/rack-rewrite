@@ -3,11 +3,11 @@ require 'test_helper'
 class RackRewriteTest < Test::Unit::TestCase
 
   def call_args(overrides={})
-    {'REQUEST_URI' => '/wiki/Yair_Flicker', 'PATH_INFO' => '/wiki/Yair_Flicker', 'QUERYSTRING' => ''}.merge(overrides)
+    {'REQUEST_URI' => '/wiki/Yair_Flicker', 'PATH_INFO' => '/wiki/Yair_Flicker', 'QUERY_STRING' => ''}.merge(overrides)
   end
   
   def call_args_no_req(overrides={})
-    {'PATH_INFO' => '/wiki/Yair_Flicker', 'QUERYSTRING' => ''}.merge(overrides)
+    {'PATH_INFO' => '/wiki/Yair_Flicker', 'QUERY_STRING' => ''}.merge(overrides)
   end
   
   def self.should_not_halt
@@ -96,8 +96,8 @@ class RackRewriteTest < Test::Unit::TestCase
         should "set REQUEST_URI to '/john'" do
           assert_equal '/john', @initial_args['REQUEST_URI']
         end
-        should "set QUERYSTRING to ''" do
-          assert_equal '', @initial_args['QUERYSTRING']
+        should "set QUERY_STRING to ''" do
+          assert_equal '', @initial_args['QUERY_STRING']
         end
       end
     end
@@ -122,8 +122,8 @@ class RackRewriteTest < Test::Unit::TestCase
         should "set REQUEST_URI to '/john'" do
           assert_equal '/john', @initial_args['REQUEST_URI']
         end
-        should "set QUERYSTRING to ''" do
-          assert_equal '', @initial_args['QUERYSTRING']
+        should "set QUERY_STRING to ''" do
+          assert_equal '', @initial_args['QUERY_STRING']
         end
       end
     end

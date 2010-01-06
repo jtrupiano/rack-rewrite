@@ -13,7 +13,7 @@ module Rack
         # using method_missing
         
         # Creates a rewrite rule that will simply rewrite the REQUEST_URI,
-        # PATH_INFO, and QUERYSTRING headers of the Rack environment.  The 
+        # PATH_INFO, and QUERY_STRING headers of the Rack environment.  The 
         # user's browser will continue to show the initially requested URL.
         # 
         #  rewrite '/wiki/John_Trupiano', '/john'
@@ -95,10 +95,10 @@ module Rack
           env['REQUEST_URI'] = interpreted_to
           if q_index = interpreted_to.index('?')
             env['PATH_INFO'] = interpreted_to[0..q_index-1]
-            env['QUERYSTRING'] = interpreted_to[q_index+1..interpreted_to.size-1]
+            env['QUERY_STRING'] = interpreted_to[q_index+1..interpreted_to.size-1]
           else
             env['PATH_INFO'] = interpreted_to
-            env['QUERYSTRING'] = ''
+            env['QUERY_STRING'] = ''
           end
           true
         when :send_file

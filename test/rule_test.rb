@@ -38,27 +38,27 @@ class RuleTest < Test::Unit::TestCase
       assert_equal rule.send(:interpret_to, '/abc'), rule.apply!(env)[1]['Location']
     end
     
-    should 'keep the QUERYSTRING when a 301 rule matches a URL with a querystring' do
+    should 'keep the QUERY_STRING when a 301 rule matches a URL with a querystring' do
       rule = Rack::Rewrite::Rule.new(:r301, %r{/john(.*)}, '/yair$1')
-      env = {'REQUEST_URI' => '/john?show_bio=1', 'PATH_INFO' => '/john', 'QUERYSTRING' => 'show_bio=1'}
+      env = {'REQUEST_URI' => '/john?show_bio=1', 'PATH_INFO' => '/john', 'QUERY_STRING' => 'show_bio=1'}
       assert_equal '/yair?show_bio=1', rule.apply!(env)[1]['Location']
     end
     
-    should 'keep the QUERYSTRING when a rewrite rule that requires a querystring matches a URL with a querystring' do
+    should 'keep the QUERY_STRING when a rewrite rule that requires a querystring matches a URL with a querystring' do
       rule = Rack::Rewrite::Rule.new(:rewrite, %r{/john(\?.*)}, '/yair$1')
-      env = {'REQUEST_URI' => '/john?show_bio=1', 'PATH_INFO' => '/john', 'QUERYSTRING' => 'show_bio=1'}
+      env = {'REQUEST_URI' => '/john?show_bio=1', 'PATH_INFO' => '/john', 'QUERY_STRING' => 'show_bio=1'}
       rule.apply!(env)
       assert_equal '/yair', env['PATH_INFO']
-      assert_equal 'show_bio=1', env['QUERYSTRING']
+      assert_equal 'show_bio=1', env['QUERY_STRING']
       assert_equal '/yair?show_bio=1', env['REQUEST_URI']
     end
     
-    should 'update the QUERYSTRING when a rewrite rule changes its value' do
+    should 'update the QUERY_STRING when a rewrite rule changes its value' do
       rule = Rack::Rewrite::Rule.new(:rewrite, %r{/(\w+)\?show_bio=(\d)}, '/$1?bio=$2')
-      env = {'REQUEST_URI' => '/john?show_bio=1', 'PATH_INFO' => '/john', 'QUERYSTRING' => 'show_bio=1'}
+      env = {'REQUEST_URI' => '/john?show_bio=1', 'PATH_INFO' => '/john', 'QUERY_STRING' => 'show_bio=1'}
       rule.apply!(env)
       assert_equal '/john', env['PATH_INFO']
-      assert_equal 'bio=1', env['QUERYSTRING']
+      assert_equal 'bio=1', env['QUERY_STRING']
       assert_equal '/john?bio=1', env['REQUEST_URI']
     end
 
@@ -231,7 +231,7 @@ class RuleTest < Test::Unit::TestCase
       end
       
       should 'match requests for domain myolddomain.com and redirect to mynewdomain.com' do
-        env = {'REQUEST_URI' => '/anything?abc=1', 'PATH_INFO' => '/anything', 'QUERYSTRING' => 'abc=1', 'SERVER_NAME' => 'myolddomain.com'}
+        env = {'REQUEST_URI' => '/anything?abc=1', 'PATH_INFO' => '/anything', 'QUERY_STRING' => 'abc=1', 'SERVER_NAME' => 'myolddomain.com'}
         assert @rule.matches?(env)
         rack_response = @rule.apply!(env)
         assert_equal 'http://mynewdomain.com/anything?abc=1', rack_response[1]['Location']
