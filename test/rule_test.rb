@@ -222,6 +222,25 @@ class RuleTest < Test::Unit::TestCase
         should_pass_maintenance_tests
       end
     end
+    
+    context 'Given the CNAME alternative rewrite rule in our README' do
+      setup do
+        @rule = Rack::Rewrite::Rule.new(:r301, %r{.*}, 'http://mynewdomain.com$&', lambda {|rack_env|
+          rack_env['SERVER_NAME'] != 'mynewdomain.com'
+        })
+      end
+      
+      should 'match requests for domain myolddomain.com and redirect to mynewdomain.com' do
+        env = {'REQUEST_URI' => '/anything?abc=1', 'PATH_INFO' => '/anything', 'QUERYSTRING' => 'abc=1', 'SERVER_NAME' => 'myolddomain.com'}
+        assert @rule.matches?(env)
+        rack_response = @rule.apply!(env)
+        assert_equal 'http://mynewdomain.com/anything?abc=1', rack_response[1]['Location']
+      end
+      
+      should 'not match requests for domain mynewdomain.com' do
+        assert !@rule.matches?({'REQUEST_URI' => '/anything', 'SERVER_NAME' => 'mynewdomain.com'})
+      end
+    end
   end
   
   context 'Rule#interpret_to' do

@@ -60,6 +60,16 @@ to these routes and keep your routes.rb clean.
 
   rewrite %r{/features(.*)}, '/facial_features$1'
 
+=== CNAME alternative
+
+In the event that you do not control your DNS, you can leverage Rack::Rewrite
+to redirect to a canonical domain.  In the following rule we utilize the
+$& substitution operator to capture the entire request URI.
+
+  r301 %r{.*}, 'http://mynewdomain.com$&', :if => Proc.new {|rack_env|
+    rack_env['SERVER_NAME'] != 'mynewdomain.com'
+  }
+
 === Site Maintenance
 
 Most capistrano users will be familiar with the following Apache rewrite rules:
@@ -179,8 +189,7 @@ received between 12AM and 8AM to an unavailable page.
   rewrite %r{(.*)}, lambda { |match, rack_env|
     Time.now.hour < 8 ? "/unavailable.html" : match[1]
   }
-
   
 == Copyright
 
-Copyright (c) 2009 John Trupiano. See LICENSE for details.
+Copyright (c) 2009-2010 John Trupiano. See LICENSE for details.

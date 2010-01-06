@@ -1,3 +1,10 @@
+=== 0.2.1 / unreleased
+* API
+  * Implement $& substitution pattern (thanks to {Ben Brinckerhoff}[http://github.com/bhb])
+  
+* Maintenance
+  * Ignore empty captures instead of failing during subsitution (thanks to {Ben Brinckerhoff}[http://github.com/bhb])
+
 === 0.2.0 / 2009-11-14
 * API
   * Allow Proc's to be be passed as the 'to' argument to rule declarations
