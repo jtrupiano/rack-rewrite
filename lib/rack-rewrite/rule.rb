@@ -72,7 +72,7 @@ module Rack
       def matches?(rack_env) #:nodoc:
         return false if !guard.nil? && !guard.call(rack_env)
         path = rack_env['REQUEST_URI'].nil? ? rack_env['PATH_INFO'] : rack_env['REQUEST_URI']
-        if self.from.is_a?(Regexp) || (Object.const_defined?(:Oniguruma) && self.from.is_a?(Oniguruma::ORegexp))
+        if self.is_a_regexp?(self.from)
           path =~ self.from
         elsif self.from.is_a?(String)
           path == self.from
@@ -84,7 +84,7 @@ module Rack
       # Either (a) return a Rack response (short-circuiting the Rack stack), or
       # (b) alter env as necessary and return true
       def apply!(env) #:nodoc:
-        interpreted_to = self.send(:interpret_to, env['REQUEST_URI'], env)
+        interpreted_to = self.interpret_to(env['REQUEST_URI'], env)
         case self.rule_type
         when :r301
           [301, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, ['Redirecting...']]
@@ -117,20 +117,25 @@ module Rack
         end
       end
       
-      private
+      protected
         def interpret_to(path, env={}) #:nodoc:
           return interpret_to_proc(path, env) if self.to.is_a?(Proc)
           return computed_to(path) if compute_to?(path)
           self.to
         end
+        
+        def is_a_regexp?(obj)
+          obj.is_a?(Regexp) || (Object.const_defined?(:Oniguruma) && obj.is_a?(Oniguruma::ORegexp))
+        end
 
+      private
         def interpret_to_proc(path, env)
           return self.to.call(match(path), env) if self.from.is_a?(Regexp)
           self.to.call(self.from, env)
         end
 
         def compute_to?(path)
-          self.from.is_a?(Regexp) && match(path)
+          self.is_a_regexp?(from) && match(path)
         end
 
         def match(path) 
@@ -145,7 +150,7 @@ module Rack
             computed_to.gsub!("$#{num}", match(path)[num].to_s)
           end
           return computed_to
-        end
+        end        
     end
   end
 end
