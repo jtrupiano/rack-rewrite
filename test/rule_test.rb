@@ -31,7 +31,30 @@ class RuleTest < Test::Unit::TestCase
     end
   end
   
+  context "#Rule#log" do
+    
+    should "verify that logs are working for r301 and r302" do
+      {:r301 => 301, :r302 => 302}.each do |status, code|
+        rule = Rack::Rewrite::Rule.new(status, %r{/pink_dragons}, '/ruby_dragons')
+        env = {'PATH_INFO' => '/pink_dragons', 'REQUEST_URI' => '/pink_dragons'}
+        rule.apply!(env)
+        assert_equal rule.logs.first, "[#{code}] Redirecting from (?-mix:\\/pink_dragons) to /ruby_dragons"
+      end
+    end
+
+    should "verify that logs are working for rewrite" do
+      rule = Rack::Rewrite::Rule.new(:rewrite, '/pink_dragons', '/ruby_dragons')
+      env = {'PATH_INFO' => '/pink_dragons', 'REQUEST_URI' => '/pink_dragons'}
+      rule.apply!(env)
+      assert_equal rule.logs.first, '[200] Rewriting from /pink_dragons to /ruby_dragons'
+    end
+    
+  end
+  
+  
+  
   context '#Rule#apply' do
+    
     should 'set Location header to result of #interpret_to for a 301' do
       rule = Rack::Rewrite::Rule.new(:r301, %r{/abc}, '/def')
       env = {'PATH_INFO' => '/abc'}
@@ -97,6 +120,10 @@ class RuleTest < Test::Unit::TestCase
       should 'return empty content' do
         assert_equal [], @response[2]
       end
+      
+      should 'log that a x-sendfile was requested' do
+        assert_equal @rule.logs.first, "[200] X-Sendfile from (?-mix:.*) to ./geminstaller.yml"
+      end
     end
     
     context 'Given a :send_file rule that matches' do
@@ -125,6 +152,10 @@ class RuleTest < Test::Unit::TestCase
       
       should 'return the contents of geminstaller.yml' do
         assert_equal File.read(@file), @response[2]
+      end
+      
+      should 'log that a sendfile was requested' do
+        assert_equal @rule.logs.first, "[200] Send File from (?-mix:.*) to ./geminstaller.yml"
       end
     end
   end

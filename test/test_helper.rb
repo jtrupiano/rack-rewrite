@@ -13,3 +13,21 @@ class Test::Unit::TestCase
 end
 
 TEST_ROOT = File.dirname(__FILE__)
+
+## mock logging so we can test it
+module Rack
+  class Rewrite
+    class Rule
+      attr_accessor :logs      
+      alias :old_initialize :initialize
+      def initialize(*args) #:nodoc:
+        @logs = []
+        old_initialize(*args)
+      end
+      private
+      def log(env, message)
+        @logs << message
+      end
+    end
+  end
+end
