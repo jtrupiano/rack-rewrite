@@ -1,3 +1,7 @@
+=== 1.0.0 / Unreleased
+* API
+  * Follow rack directory/require convention: require 'rack/rewrite' instead of 'rack-rewrite'
+
 === 0.2.1 / 2010-01-06
 * API
   * Implement $& substitution pattern (thanks to {Ben Brinckerhoff}[http://github.com/bhb])
