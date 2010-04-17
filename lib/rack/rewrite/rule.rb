@@ -87,9 +87,9 @@ module Rack
         interpreted_to = self.interpret_to(env['REQUEST_URI'], env)
         case self.rule_type
         when :r301
-          [301, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, ['Redirecting...']]
+          [301, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, [redirect_message(interpreted_to)]]
         when :r302
-          [302, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, ['Redirecting...']]
+          [302, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, [redirect_message(interpreted_to)]]
         when :rewrite
           # return [200, {}, {:content => env.inspect}]
           env['REQUEST_URI'] = interpreted_to
@@ -150,7 +150,11 @@ module Rack
             computed_to.gsub!("$#{num}", match(path)[num].to_s)
           end
           return computed_to
-        end        
+        end
+        
+        def redirect_message(location)
+          %Q(Redirecting to <a href="#{location}">#{location}</a>)
+        end
     end
   end
 end

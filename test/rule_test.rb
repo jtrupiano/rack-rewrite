@@ -40,6 +40,12 @@ class RuleTest < Test::Unit::TestCase
       assert_equal rule.send(:interpret_to, '/abc'), rule.apply!(env)[1]['Location']
     end
     
+    should 'include a link to the result of #interpret_to for a 301' do
+      rule = Rack::Rewrite::Rule.new(:r301, %r{/abc}, '/def')
+      env = {'PATH_INFO' => '/abc'}
+      assert_match /\/def/, rule.apply!(env)[2][0]
+    end
+    
     should 'keep the QUERY_STRING when a 301 rule matches a URL with a querystring' do
       rule = Rack::Rewrite::Rule.new(:r301, %r{/john(.*)}, '/yair$1')
       env = {'REQUEST_URI' => '/john?show_bio=1', 'PATH_INFO' => '/john', 'QUERY_STRING' => 'show_bio=1'}

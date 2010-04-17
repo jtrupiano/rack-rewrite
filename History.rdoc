@@ -1,6 +1,7 @@
 === 1.0.0 / Unreleased
 * API
   * Follow rack directory/require convention: require 'rack/rewrite' instead of 'rack-rewrite'
+  * Include an HTML anchor tag linked to where the URL being redirected to in the body of 301's and 302's
 
 === 0.2.1 / 2010-01-06
 * API
