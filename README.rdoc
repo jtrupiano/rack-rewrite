@@ -15,7 +15,7 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 === Sample rackup file
   
   gem 'rack-rewrite', '~> 0.2.1'
-  require 'rack/rewrite
+  require 'rack-rewrite
   use Rack::Rewrite do
     rewrite '/wiki/John_Trupiano', '/john'
     r301 '/wiki/Yair_Flicker', '/yair'
@@ -25,7 +25,7 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 
 === Sample usage in a rails app
   config.gem 'rack-rewrite', '~> 0.2.1'
-  require 'rack/rewrite'
+  require 'rack-rewrite'
   config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
     rewrite '/wiki/John_Trupiano', '/john'
     r301 '/wiki/Yair_Flicker', '/yair'
