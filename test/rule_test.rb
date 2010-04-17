@@ -2,6 +2,8 @@ require File.join(File.dirname(__FILE__), 'test_helper')
 
 class RuleTest < Test::Unit::TestCase
   
+  TEST_ROOT = File.dirname(__FILE__)
+  
   def self.should_pass_maintenance_tests
     context 'and the maintenance file does in fact exist' do
       setup { File.stubs(:exists?).returns(true) }
