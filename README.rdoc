@@ -89,7 +89,7 @@ We can replace the mod_rewrite rules with the following Rack::Rewrite rule:
 
   maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
   send_file /.*/, maintenance_file, :if => Proc.new { |rack_env|
-    File.exists?(maintenance_file) && rack_env['REQUEST_URI'] !~ /\.(css|jpg|png)/
+    File.exists?(maintenance_file) && rack_env['PATH_INFO'] !~ /\.(css|jpg|png)/
   }
 
 If you're running Ruby 1.9, this rule is simplified:
@@ -111,9 +111,10 @@ get away with:
 
 === :rewrite
 
-Calls to #rewrite will simply update the PATH_INFO and REQUEST_URI HTTP header
-values and pass the request onto the next chain in the Rack stack.  The URL
-that a user's browser will show will not be changed.  See these examples:
+Calls to #rewrite will simply update the PATH_INFO, QUERY_STRING and 
+REQUEST_URI HTTP header values and pass the request onto the next chain in 
+the Rack stack.  The URL that a user's browser will show will not be changed.  
+See these examples:
 
   rewrite '/wiki/John_Trupiano', '/john'   # [1]
   rewrite %r{/wiki/(\w+)_\w+}, '/$1'       # [2]

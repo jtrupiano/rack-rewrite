@@ -1,5 +1,6 @@
 === 1.0.0 / Unreleased
 * API
+  * Fix rack 1.1.0 / rails3 compatibility by eliminating reliance on REQUEST_URI env param.  Paths are now constructed with PATH_INFO and QUERY_STRING
   * Follow rack directory/require convention: require 'rack/rewrite' instead of 'rack-rewrite'
   * Include an HTML anchor tag linked to where the URL being redirected to in the body of 301's and 302's
 

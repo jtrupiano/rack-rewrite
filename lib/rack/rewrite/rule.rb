@@ -71,7 +71,7 @@ module Rack
 
       def matches?(rack_env) #:nodoc:
         return false if !guard.nil? && !guard.call(rack_env)
-        path = rack_env['REQUEST_URI'].nil? ? rack_env['PATH_INFO'] : rack_env['REQUEST_URI']
+        path = build_path_from_env(rack_env)
         if self.is_a_regexp?(self.from)
           path =~ self.from
         elsif self.from.is_a?(String)
@@ -84,7 +84,7 @@ module Rack
       # Either (a) return a Rack response (short-circuiting the Rack stack), or
       # (b) alter env as necessary and return true
       def apply!(env) #:nodoc:
-        interpreted_to = self.interpret_to(env['REQUEST_URI'], env)
+        interpreted_to = self.interpret_to(env)
         case self.rule_type
         when :r301
           [301, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, [redirect_message(interpreted_to)]]
@@ -118,7 +118,8 @@ module Rack
       end
       
       protected
-        def interpret_to(path, env={}) #:nodoc:
+        def interpret_to(env) #:nodoc:
+          path = build_path_from_env(env)
           return interpret_to_proc(path, env) if self.to.is_a?(Proc)
           return computed_to(path) if compute_to?(path)
           self.to
@@ -150,6 +151,13 @@ module Rack
             computed_to.gsub!("$#{num}", match(path)[num].to_s)
           end
           return computed_to
+        end
+        
+        # Construct the URL (without domain) from PATH_INFO and QUERY_STRING
+        def build_path_from_env(env)
+          path = env['PATH_INFO']
+          path += "?#{env['QUERY_STRING']}" unless env['QUERY_STRING'].nil? || env['QUERY_STRING'].empty?
+          path
         end
         
         def redirect_message(location)
