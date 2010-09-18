@@ -87,9 +87,9 @@ module Rack
         interpreted_to = self.interpret_to(env)
         case self.rule_type
         when :r301
-          [301, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, [redirect_message(interpreted_to)]]
+          [301, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}, [redirect_message(interpreted_to)]]
         when :r302
-          [302, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, [redirect_message(interpreted_to)]]
+          [302, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}, [redirect_message(interpreted_to)]]
         when :rewrite
           # return [200, {}, {:content => env.inspect}]
           env['REQUEST_URI'] = interpreted_to

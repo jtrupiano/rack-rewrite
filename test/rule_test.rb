@@ -70,12 +70,20 @@ class RuleTest < Test::Unit::TestCase
       assert_equal '/john?bio=1', env['REQUEST_URI']
     end
 
-    should 'set Content-Type header to text/html for a 301 and 302' do
+    should 'set Content-Type header to text/html for a 301 and 302 request for a .html page' do
       [:r301, :r302].each do |rule_type|
-        rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def')
+        rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def.html')
         env = {'PATH_INFO' => '/abc'}
         assert_equal 'text/html', rule.apply!(env)[1]['Content-Type']
       end
+    end
+    
+    should 'set Content-Type header to text/css for a 301 and 302 request for a .css page' do
+      [:r301, :r302].each do |rule_type|
+        rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def.css')
+        env = {'PATH_INFO' => '/abc'}
+        assert_equal 'text/css', rule.apply!(env)[1]['Content-Type']
+      end      
     end
     
     context 'Given an :x_send_file rule that matches' do
