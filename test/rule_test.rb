@@ -139,8 +139,8 @@ class RuleTest < Test::Unit::TestCase
         assert_equal File.size(@file).to_s, @response[1]['Content-Length']
       end
       
-      should 'return the contents of geminstaller.yml' do
-        assert_equal File.read(@file), @response[2]
+      should 'return the contents of geminstaller.yml in an array for Ruby 1.9.2 compatibility' do
+        assert_equal [File.read(@file)], @response[2]
       end
     end
   end
