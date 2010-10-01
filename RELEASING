@@ -2,3 +2,4 @@ Update History.txt with relevant details
 Manually edit .gemspec updating file list, version, and date.
 Tag the new version (git tag -a vX.X.X)
 Build and push the gem (gem build rack-rewrite.gemspec && gem push rack-rewrite-X.X.X.gem)
+Bump the gem version to the next dot release with a prerelease (1.1.1 --> 1.1.2.a)
