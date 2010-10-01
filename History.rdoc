@@ -1,3 +1,7 @@
+=== 1.0.2 / 2010-10-01
+* Maintenance
+  * :send_file rules return content in an Array for Ruby 1.9.2 compatibility
+
 === 1.0.1 / 2010-09-17
 * Maintenance
   * Set Content-Type based on file extension of file/location being redirected to.  Addresses GitHub Issue #8.
