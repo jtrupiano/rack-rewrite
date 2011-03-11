@@ -146,6 +146,46 @@ class RuleTest < Test::Unit::TestCase
   end
   
   context 'Rule#matches' do
+    context 'Given rule with :not option which matches "from" string' do
+      setup do
+        @rule = Rack::Rewrite::Rule.new(:rewrite, /^\/features/, '/facial_features', :not => '/features')
+      end
+      should 'not match PATH_INFO of /features' do
+        assert !@rule.matches?(rack_env_for("/features"))
+      end
+      should 'match PATH_INFO of /features.xml' do
+        assert @rule.matches?(rack_env_for("/features.xml"))
+      end
+    end
+    
+    context 'Given rule with :host option of testapp.com' do
+      setup do
+        @rule = Rack::Rewrite::Rule.new(:rewrite, /^\/features/, '/facial_features', :host => 'testapp.com')
+      end
+      
+      should 'match PATH_INFO of /features and HOST of testapp.com' do
+        assert @rule.matches?(rack_env_for("/features", 'HOST' => 'testapp.com'))
+      end
+      
+      should 'not match PATH_INFO of /features and HOST of nottestapp.com' do
+        assert ! @rule.matches?(rack_env_for("/features", 'HOST' => 'nottestapp.com'))
+      end
+    end
+    
+    context 'Given rule with :method option of POST' do
+      setup do
+        @rule = Rack::Rewrite::Rule.new(:rewrite, '/features', '/facial_features', :method => 'POST')
+      end
+      
+      should 'match PATH_INFO of /features and METHOD of POST' do
+        assert @rule.matches?(rack_env_for("/features", 'METHOD' => 'POST'))
+      end
+      
+      should 'not match PATH_INFO of /features and METHOD of DELETE' do
+        assert ! @rule.matches?(rack_env_for("/features", 'METHOD' => 'DELETE'))
+      end
+    end
+    
     context 'Given any rule with a "from" string of /features' do
       setup do
         @rule = Rack::Rewrite::Rule.new(:rewrite, '/features', '/facial_features')
@@ -307,8 +347,8 @@ class RuleTest < Test::Unit::TestCase
     end
   end
   
-  def rack_env_for(url)
+  def rack_env_for(url, options = {})
     components = url.split('?')
-    {'PATH_INFO' => components[0], 'QUERY_STRING' => components[1] || ''}
+    {'PATH_INFO' => components[0], 'QUERY_STRING' => components[1] || ''}.merge(options)
   end
 end

@@ -19,36 +19,32 @@ module Rack
         #  rewrite '/wiki/John_Trupiano', '/john'
         #  rewrite %r{/wiki/(\w+)_\w+}, '/$1'
         #  rewrite %r{(.*)}, '/maintenance.html', :if => lambda { File.exists?('maintenance.html') }
-        def rewrite(from, to, *args)
-          options = args.last.is_a?(Hash) ? args.last : {}
-          @rules << Rule.new(:rewrite, from, to, options[:if])
+        def rewrite(*args)
+          add_rule :rewrite, *args
         end
         
         # Creates a redirect rule that will send a 301 when matching.
         #
         #  r301 '/wiki/John_Trupiano', '/john'
         #  r301 '/contact-us.php', '/contact-us'
-        def r301(from, to, *args)
-          options = args.last.is_a?(Hash) ? args.last : {}
-          @rules << Rule.new(:r301, from, to, options[:if])
+        def r301(*args)
+          add_rule :r301, *args
         end
         
         # Creates a redirect rule that will send a 302 when matching.
         #
         #  r302 '/wiki/John_Trupiano', '/john'
         #  r302 '/wiki/(.*)', 'http://www.google.com/?q=$1'
-        def r302(from, to, *args)
-          options = args.last.is_a?(Hash) ? args.last : {}
-          @rules << Rule.new(:r302, from, to, options[:if])
+        def r302(*args)
+          add_rule :r302, *args
         end
         
         # Creates a rule that will render a file if matched.
         #
         #  send_file /*/, 'public/system/maintenance.html', 
         #    :if => Proc.new { File.exists?('public/system/maintenance.html') }
-        def send_file(from, to, *args)
-          options = args.last.is_a?(Hash) ? args.last : {}
-          @rules << Rule.new(:send_file, from, to, options[:if])          
+        def send_file(*args)
+          add_rule :send_file, *args
         end
         
         # Creates a rule that will render a file using x-send-file
@@ -56,29 +52,29 @@ module Rack
         #
         #  x_send_file /*/, 'public/system/maintenance.html', 
         #    :if => Proc.new { File.exists?('public/system/maintenance.html') }
-        def x_send_file(from, to, *args)
-          options = args.last.is_a?(Hash) ? args.last : {}
-          @rules << Rule.new(:x_send_file, from, to, options[:if])
-        end        
+        def x_send_file(*args)
+          add_rule :x_send_file, *args
+        end
+        
+      private
+        def add_rule(method, from, to, options = {})
+          @rules << Rule.new(method.to_sym, from, to, options)
+        end
+        
     end
 
     # TODO: Break rules into subclasses
     class Rule #:nodoc:
-      attr_reader :rule_type, :from, :to, :guard
-      def initialize(rule_type, from, to, guard=nil) #:nodoc:
-        @rule_type, @from, @to, @guard = rule_type, from, to, guard
+      attr_reader :rule_type, :from, :to, :options
+      def initialize(rule_type, from, to, options={}) #:nodoc:
+        @rule_type, @from, @to, @options = rule_type, from, to, normalize_options(options)
       end
 
       def matches?(rack_env) #:nodoc:
-        return false if !guard.nil? && !guard.call(rack_env)
+        return false if options[:if].respond_to?(:call) && !options[:if].call(rack_env)
         path = build_path_from_env(rack_env)
-        if self.is_a_regexp?(self.from)
-          path =~ self.from
-        elsif self.from.is_a?(String)
-          path == self.from
-        else
-          false
-        end
+        
+        self.match_options?(rack_env) && string_matches?(path, self.from)
       end
 
       # Either (a) return a Rack response (short-circuiting the Rack stack), or
@@ -128,8 +124,30 @@ module Rack
         def is_a_regexp?(obj)
           obj.is_a?(Regexp) || (Object.const_defined?(:Oniguruma) && obj.is_a?(Oniguruma::ORegexp))
         end
-
+        
+        def match_options?(env, path = build_path_from_env(env))
+          matches = []
+          
+          # negative matches
+          if options[:not]
+            matches << !string_matches?(path, options[:not])
+          end
+          
+          # possitive matches
+          [:host, :method].each do |key|
+            matches << string_matches?(env[key.to_s.upcase], options[key]) if options[key]
+          end
+          
+          matches.all?
+        end
+        
       private
+        def normalize_options(arg)
+          options = arg.respond_to?(:call) ? {:if => arg} : arg
+          options.symbolize_keys! if options.respond_to? :symbolize_keys!
+          options.freeze
+        end
+      
         def interpret_to_proc(path, env)
           return self.to.call(match(path), env) if self.from.is_a?(Regexp)
           self.to.call(self.from, env)
@@ -141,6 +159,16 @@ module Rack
 
         def match(path) 
           self.from.match(path)
+        end
+        
+        def string_matches?(string, matcher)
+          if self.is_a_regexp?(matcher)
+            string =~ matcher
+          elsif matcher.is_a?(String)
+            string == matcher
+          else
+            false
+          end
         end
 
         def computed_to(path)
