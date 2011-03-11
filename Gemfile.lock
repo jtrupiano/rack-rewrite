@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rack-rewrite (1.0.3.a)
+    rack-rewrite (1.1)
 
 GEM
   remote: http://rubygems.org/

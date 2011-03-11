@@ -57,7 +57,7 @@ module Rack
         end
         
       private
-        def add_rule(method, from, to, options = {})
+        def add_rule(method, from, to, options = {}) #:nodoc:
           @rules << Rule.new(method.to_sym, from, to, options)
         end
         

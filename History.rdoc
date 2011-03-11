@@ -1,3 +1,10 @@
+=== 1.1.0 / 2011-03-11
+* API
+  * :host and :method option to match HOST and METHOD env params.
+  * :not option to negative match against path.
+* Maintenance
+  * Refactored internals a bit.
+
 === 1.0.2 / 2010-10-01
 * Maintenance
   * :send_file rules return content in an Array for Ruby 1.9.2 compatibility
