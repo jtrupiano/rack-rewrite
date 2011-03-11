@@ -133,7 +133,7 @@ module Rack
           
           # possitive matches
           matches << string_matches?(env['REQUEST_METHOD'], options[:method]) if options[:method]
-          matches << string_matches?(env['HOST'], options[:host]) if options[:host]
+          matches << string_matches?(env['SERVER_NAME'], options[:host]) if options[:host]
           
           matches.all?
         end

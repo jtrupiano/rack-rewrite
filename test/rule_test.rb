@@ -164,11 +164,11 @@ class RuleTest < Test::Unit::TestCase
       end
       
       should 'match PATH_INFO of /features and HOST of testapp.com' do
-        assert @rule.matches?(rack_env_for("/features", 'HOST' => 'testapp.com'))
+        assert @rule.matches?(rack_env_for("/features", 'SERVER_NAME' => 'testapp.com'))
       end
       
       should 'not match PATH_INFO of /features and HOST of nottestapp.com' do
-        assert ! @rule.matches?(rack_env_for("/features", 'HOST' => 'nottestapp.com'))
+        assert ! @rule.matches?(rack_env_for("/features", 'SERVER_NAME' => 'nottestapp.com'))
       end
     end
     
