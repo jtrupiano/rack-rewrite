@@ -1,4 +1,4 @@
-require "lib/rack/rewrite/version"
+require File.join(File.expand_path("..", __FILE__), 'lib', 'rack', 'rewrite', 'version')
 
 Gem::Specification.new do |s|
   s.name = %q{rack-rewrite}
@@ -15,16 +15,17 @@ Gem::Specification.new do |s|
     "README.rdoc"
   ]
   s.files = [
-    ".document",
-    ".gitignore",
     "History.rdoc",
     "LICENSE",
     "README.rdoc",
     "Rakefile",
-    "RELEASING",
+    "VERSION",
+    "Gemfile",
+    "Gemfile.lock",
     "lib/rack-rewrite.rb",
     "lib/rack/rewrite.rb",
     "lib/rack/rewrite/rule.rb",
+    "lib/rack/rewrite/version.rb",
     "rack-rewrite.gemspec",
     "test/geminstaller.yml",
     "test/rack-rewrite_test.rb",
