@@ -1,6 +1,8 @@
+require "lib/rack/rewrite/version"
+
 Gem::Specification.new do |s|
   s.name = %q{rack-rewrite}
-  s.version = File.read("VERSION")
+  s.version = Rack::Rewrite::VERSION
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["John Trupiano"]
