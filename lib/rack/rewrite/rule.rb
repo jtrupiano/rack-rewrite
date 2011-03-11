@@ -129,14 +129,11 @@ module Rack
           matches = []
           
           # negative matches
-          if options[:not]
-            matches << !string_matches?(path, options[:not])
-          end
+          matches << !string_matches?(path, options[:not]) if options[:not]
           
           # possitive matches
-          [:host, :method].each do |key|
-            matches << string_matches?(env[key.to_s.upcase], options[key]) if options[key]
-          end
+          matches << string_matches?(env['REQUEST_METHOD'], options[:method]) if options[:method]
+          matches << string_matches?(env['HOST'], options[:host]) if options[:host]
           
           matches.all?
         end

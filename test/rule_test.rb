@@ -177,12 +177,12 @@ class RuleTest < Test::Unit::TestCase
         @rule = Rack::Rewrite::Rule.new(:rewrite, '/features', '/facial_features', :method => 'POST')
       end
       
-      should 'match PATH_INFO of /features and METHOD of POST' do
-        assert @rule.matches?(rack_env_for("/features", 'METHOD' => 'POST'))
+      should 'match PATH_INFO of /features and REQUEST_METHOD of POST' do
+        assert @rule.matches?(rack_env_for("/features", 'REQUEST_METHOD' => 'POST'))
       end
       
-      should 'not match PATH_INFO of /features and METHOD of DELETE' do
-        assert ! @rule.matches?(rack_env_for("/features", 'METHOD' => 'DELETE'))
+      should 'not match PATH_INFO of /features and REQUEST_METHOD of DELETE' do
+        assert ! @rule.matches?(rack_env_for("/features", 'REQUEST_METHOD' => 'DELETE'))
       end
     end
     
