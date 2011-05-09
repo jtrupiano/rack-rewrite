@@ -1,8 +1,6 @@
-require File.join(File.expand_path("..", __FILE__), 'lib', 'rack', 'rewrite', 'version')
-
 Gem::Specification.new do |s|
-  s.name = %q{rack-rewrite}
-  s.version = Rack::Rewrite::VERSION
+  s.name = 'rack-rewrite'
+  s.version = File.read('VERSION')
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["John Trupiano"]
@@ -43,6 +41,7 @@ Gem::Specification.new do |s|
     "test/rule_test.rb",
     "test/test_helper.rb"
   ]
+  #s.add_dependency 'rack'
   
   s.add_development_dependency 'bundler', '~> 1.0.10'
   s.add_development_dependency 'shoulda', '~> 2.10.2'

@@ -1,6 +1,7 @@
-require 'rack/rewrite/rule'
-
 module Rack
+  autoload :RuleSet, 'rack/rewrite/rule'
+  autoload :VERSION, 'rack/rewrite/version'
+  
   # A rack middleware for defining and applying rewrite rules. In many cases you 
   # can get away with rack-rewrite instead of writing Apache mod_rewrite rules.  
   class Rewrite
