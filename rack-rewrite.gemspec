@@ -38,6 +38,8 @@ Gem::Specification.new do |s|
   s.summary = %q{A rack middleware for enforcing rewrite rules}
   s.test_files = [
     "test/rack-rewrite_test.rb",
+    "test/geminstaller.yml",
+    "test/rack-rewrite_test.rb",
     "test/rule_test.rb",
     "test/test_helper.rb"
   ]

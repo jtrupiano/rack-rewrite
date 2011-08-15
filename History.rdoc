@@ -1,4 +1,4 @@
-=== 1.1.0 / 2011-03-11
+=== 1.1.0 / 2011-08-15
 * API
   * :host and :method option to match SERVER_NAME and REQUEST_METHOD env params.
   * :not option to negative match against path.
