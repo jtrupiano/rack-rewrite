@@ -169,6 +169,14 @@ capture group and substitution pattern in your rewrite rule to achieve this.
 This rule will store the querystring in a capture group (via '(?.*)' ) and
 will substitute the querystring back into the rewritten URL (via $1).
 
+=== Custom response headers
+
+Using the :headers option you can set custom response headers e.g. for HTTP caching instructions.
+
+  r301 "/features", "/facial_features", :headers => {'Cache-Control' => 'no-cache'}
+
+This option applies to redirect and sendfile rules.
+
 === Matching on a host
 
 Using the :host option you can match requests to a specific hostname.
