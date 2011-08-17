@@ -97,7 +97,7 @@ class RuleTest < Test::Unit::TestCase
     context 'Given an :x_send_file rule that matches' do
       setup do
         @file = File.join(TEST_ROOT, 'geminstaller.yml')
-        @rule = Rack::Rewrite::Rule.new(:x_send_file, /.*/, @file)
+        @rule = Rack::Rewrite::Rule.new(:x_send_file, /.*/, @file, :headers => {'Cache-Control' => 'no-cache'})
         env = {'PATH_INFO' => '/abc'}
         @response = @rule.apply!(env)
       end
@@ -118,6 +118,10 @@ class RuleTest < Test::Unit::TestCase
         assert_equal File.size(@file).to_s, @response[1]['Content-Length']
       end
       
+      should 'return additional headers' do
+        assert_equal 'no-cache', @response[1]['Cache-Control']
+      end
+      
       should 'return empty content' do
         assert_equal [], @response[2]
       end
@@ -126,7 +130,7 @@ class RuleTest < Test::Unit::TestCase
     context 'Given a :send_file rule that matches' do
       setup do
         @file = File.join(TEST_ROOT, 'geminstaller.yml')
-        @rule = Rack::Rewrite::Rule.new(:send_file, /.*/, @file)
+        @rule = Rack::Rewrite::Rule.new(:send_file, /.*/, @file, :headers => {'Cache-Control' => 'no-cache'})
         env = {'PATH_INFO' => '/abc'}
         @response = @rule.apply!(env)
       end
@@ -145,6 +149,10 @@ class RuleTest < Test::Unit::TestCase
       
       should 'return the proper Content-Length' do
         assert_equal File.size(@file).to_s, @response[1]['Content-Length']
+      end
+      
+      should 'return additional headers' do
+        assert_equal 'no-cache', @response[1]['Cache-Control']
       end
       
       should 'return the contents of geminstaller.yml in an array for Ruby 1.9.2 compatibility' do

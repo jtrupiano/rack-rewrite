@@ -102,13 +102,13 @@ module Rack
           [200, {
             'Content-Length' => ::File.size(interpreted_to).to_s,
             'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
-            }, [::File.read(interpreted_to)]]
+            }.merge!(additional_headers), [::File.read(interpreted_to)]]
         when :x_send_file
           [200, {
             'X-Sendfile'     => interpreted_to,
             'Content-Length' => ::File.size(interpreted_to).to_s,
             'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
-            }, []]
+            }.merge!(additional_headers), []]
         else
           raise Exception.new("Unsupported rule: #{self.rule_type}")
         end
