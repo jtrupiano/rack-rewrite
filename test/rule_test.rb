@@ -86,6 +86,14 @@ class RuleTest < Test::Unit::TestCase
       end      
     end
     
+    should 'set additional headers for a 301 and 302 request' do
+      [:r301, :r302].each do |rule_type|
+        rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def.css', {:headers => {'Cache-Control' => 'no-cache'}})
+        env = {'PATH_INFO' => '/abc'}
+        assert_equal 'no-cache', rule.apply!(env)[1]['Cache-Control']
+      end      
+    end
+    
     context 'Given an :x_send_file rule that matches' do
       setup do
         @file = File.join(TEST_ROOT, 'geminstaller.yml')
