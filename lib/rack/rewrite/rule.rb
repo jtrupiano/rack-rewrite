@@ -81,11 +81,12 @@ module Rack
       # (b) alter env as necessary and return true
       def apply!(env) #:nodoc:
         interpreted_to = self.interpret_to(env)
+        additional_headers = @options[:headers] || {}
         case self.rule_type
         when :r301
-          [301, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}, [redirect_message(interpreted_to)]]
+          [301, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
         when :r302
-          [302, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}, [redirect_message(interpreted_to)]]
+          [302, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
         when :rewrite
           # return [200, {}, {:content => env.inspect}]
           env['REQUEST_URI'] = interpreted_to
@@ -101,13 +102,13 @@ module Rack
           [200, {
             'Content-Length' => ::File.size(interpreted_to).to_s,
             'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
-            }, [::File.read(interpreted_to)]]
+            }.merge!(additional_headers), [::File.read(interpreted_to)]]
         when :x_send_file
           [200, {
             'X-Sendfile'     => interpreted_to,
             'Content-Length' => ::File.size(interpreted_to).to_s,
             'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
-            }, []]
+            }.merge!(additional_headers), []]
         else
           raise Exception.new("Unsupported rule: #{self.rule_type}")
         end
