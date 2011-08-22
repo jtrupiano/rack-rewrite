@@ -1,33 +1,23 @@
 require 'rubygems'
-require 'test/unit'
-gem 'shoulda', '~> 2.10.2'
-require 'shoulda'
-gem 'mocha', '~> 0.9.7'
-require 'mocha'
+require 'bundler/setup'
 
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-require 'rack-rewrite'
+Bundler.require :default, :development
+
+require 'test/unit'
 
 class Test::Unit::TestCase
 end
 
 TEST_ROOT = File.dirname(__FILE__)
 
-## mock logging so we can test it
-module Rack
-  class Rewrite
-    class Rule
-      attr_accessor :logs      
-      alias :old_initialize :initialize
-      def initialize(*args) #:nodoc:
-        @logs = []
-        old_initialize(*args)
-      end
-      private
-      def log(env, message)
-        @logs << message
-      end
-    end
+
+class MockLogger
+  attr_reader :logs
+  def initialize
+    @logs = []
   end
+  def write(message, &block)
+    @logs << message
+  end
+  alias :info :write
 end

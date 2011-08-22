@@ -19,36 +19,32 @@ module Rack
         #  rewrite '/wiki/John_Trupiano', '/john'
         #  rewrite %r{/wiki/(\w+)_\w+}, '/$1'
         #  rewrite %r{(.*)}, '/maintenance.html', :if => lambda { File.exists?('maintenance.html') }
-        def rewrite(from, to, *args)
-          options = args.last.is_a?(Hash) ? args.last : {}
-          @rules << Rule.new(:rewrite, from, to, options[:if])
+        def rewrite(*args)
+          add_rule :rewrite, *args
         end
         
         # Creates a redirect rule that will send a 301 when matching.
         #
         #  r301 '/wiki/John_Trupiano', '/john'
         #  r301 '/contact-us.php', '/contact-us'
-        def r301(from, to, *args)
-          options = args.last.is_a?(Hash) ? args.last : {}
-          @rules << Rule.new(:r301, from, to, options[:if])
+        def r301(*args)
+          add_rule :r301, *args
         end
         
         # Creates a redirect rule that will send a 302 when matching.
         #
         #  r302 '/wiki/John_Trupiano', '/john'
         #  r302 '/wiki/(.*)', 'http://www.google.com/?q=$1'
-        def r302(from, to, *args)
-          options = args.last.is_a?(Hash) ? args.last : {}
-          @rules << Rule.new(:r302, from, to, options[:if])
+        def r302(*args)
+          add_rule :r302, *args
         end
         
         # Creates a rule that will render a file if matched.
         #
         #  send_file /*/, 'public/system/maintenance.html', 
         #    :if => Proc.new { File.exists?('public/system/maintenance.html') }
-        def send_file(from, to, *args)
-          options = args.last.is_a?(Hash) ? args.last : {}
-          @rules << Rule.new(:send_file, from, to, options[:if])          
+        def send_file(*args)
+          add_rule :send_file, *args
         end
         
         # Creates a rule that will render a file using x-send-file
@@ -56,45 +52,46 @@ module Rack
         #
         #  x_send_file /*/, 'public/system/maintenance.html', 
         #    :if => Proc.new { File.exists?('public/system/maintenance.html') }
-        def x_send_file(from, to, *args)
-          options = args.last.is_a?(Hash) ? args.last : {}
-          @rules << Rule.new(:x_send_file, from, to, options[:if])
-        end        
+        def x_send_file(*args)
+          add_rule :x_send_file, *args
+        end
+        
+      private
+        def add_rule(method, from, to, options = {}) #:nodoc:
+          @rules << Rule.new(method.to_sym, from, to, options)
+        end
+        
     end
 
     # TODO: Break rules into subclasses
     class Rule #:nodoc:
-      attr_reader :rule_type, :from, :to, :guard
-      def initialize(rule_type, from, to, guard=nil) #:nodoc:
-        @rule_type, @from, @to, @guard = rule_type, from, to, guard
+      attr_reader :rule_type, :from, :to, :options
+      def initialize(rule_type, from, to, options={}) #:nodoc:
+        @rule_type, @from, @to, @options = rule_type, from, to, normalize_options(options)
       end
 
       def matches?(rack_env) #:nodoc:
-        return false if !guard.nil? && !guard.call(rack_env)
-        path = rack_env['REQUEST_URI'].nil? ? rack_env['PATH_INFO'] : rack_env['REQUEST_URI']
-        if self.is_a_regexp?(self.from)
-          path =~ self.from
-        elsif self.from.is_a?(String)
-          path == self.from
-        else
-          false
-        end
+        return false if options[:if].respond_to?(:call) && !options[:if].call(rack_env)
+        path = build_path_from_env(rack_env)
+        
+        self.match_options?(rack_env) && string_matches?(path, self.from)
       end
 
       # Either (a) return a Rack response (short-circuiting the Rack stack), or
       # (b) alter env as necessary and return true
       def apply!(env) #:nodoc:
-        interpreted_to = self.interpret_to(env['REQUEST_URI'], env)
+        interpreted_to = self.interpret_to(env)
         case self.rule_type
         when :r301
-          log(env, "[301] Redirecting from #{self.from} to #{interpreted_to}")
-          [301, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, ['Redirecting...']]
+          log(env, "[301] Redirecting from #{self.from.inspect} to #{interpreted_to}")
+          [301, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}, [redirect_message(interpreted_to)]]
         when :r302
-          log(env, "[302] Redirecting from #{self.from} to #{interpreted_to}")
-          [302, {'Location' => interpreted_to, 'Content-Type' => 'text/html'}, ['Redirecting...']]
+          log(env, "[302] Redirecting from #{self.from.inspect} to #{interpreted_to}")
+          [302, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}, [redirect_message(interpreted_to)]]
+
         when :rewrite
           # return [200, {}, {:content => env.inspect}]
-          log(env, "[200] Rewriting from #{self.from} to #{interpreted_to}")
+          log(env, "[200] Rewriting from #{self.from.inspect} to #{interpreted_to}")
           env['REQUEST_URI'] = interpreted_to
           if q_index = interpreted_to.index('?')
             env['PATH_INFO'] = interpreted_to[0..q_index-1]
@@ -105,13 +102,13 @@ module Rack
           end
           true
         when :send_file
-          log(env, "[200] Send File from #{self.from} to #{interpreted_to}")
+          log(env, "[200] Send File from #{self.from.inspect} to #{interpreted_to}")
           [200, {
             'Content-Length' => ::File.size(interpreted_to).to_s,
             'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
-            }, ::File.read(interpreted_to)]
+            }, [::File.read(interpreted_to)]]
         when :x_send_file
-          log(env, "[200] X-Sendfile from #{self.from} to #{interpreted_to}")
+          log(env, "[200] X-Sendfile from #{self.from.inspect} to #{interpreted_to}")
           [200, {
             'X-Sendfile'     => interpreted_to,
             'Content-Length' => ::File.size(interpreted_to).to_s,
@@ -123,7 +120,8 @@ module Rack
       end
       
       protected
-        def interpret_to(path, env={}) #:nodoc:
+        def interpret_to(env) #:nodoc:
+          path = build_path_from_env(env)
           return interpret_to_proc(path, env) if self.to.is_a?(Proc)
           return computed_to(path) if compute_to?(path)
           self.to
@@ -132,12 +130,37 @@ module Rack
         def is_a_regexp?(obj)
           obj.is_a?(Regexp) || (Object.const_defined?(:Oniguruma) && obj.is_a?(Oniguruma::ORegexp))
         end
-
+        
+        def match_options?(env, path = build_path_from_env(env))
+          matches = []
+          
+          # negative matches
+          matches << !string_matches?(path, options[:not]) if options[:not]
+          
+          # possitive matches
+          matches << string_matches?(env['REQUEST_METHOD'], options[:method]) if options[:method]
+          matches << string_matches?(env['SERVER_NAME'], options[:host]) if options[:host]
+          
+          matches.all?
+        end
+        
       private
+
         def log(env, message)
-          env['rack.errors'].write("rewrite: #{message}\n")
+          message = "[INFO] rack-rewrite: #{message}"
+          if env['rack.logger']
+            env['rack.logger'].info(message) #this is the right way but rails doesn't impliment this
+          else
+            env['rack.errors'].write(message)
+          end
         end
           
+        def normalize_options(arg)
+          options = arg.respond_to?(:call) ? {:if => arg} : arg
+          options.symbolize_keys! if options.respond_to? :symbolize_keys!
+          options.freeze
+        end
+    
         def interpret_to_proc(path, env)
           return self.to.call(match(path), env) if self.from.is_a?(Regexp)
           self.to.call(self.from, env)
@@ -150,6 +173,16 @@ module Rack
         def match(path) 
           self.from.match(path)
         end
+        
+        def string_matches?(string, matcher)
+          if self.is_a_regexp?(matcher)
+            string =~ matcher
+          elsif matcher.is_a?(String)
+            string == matcher
+          else
+            false
+          end
+        end
 
         def computed_to(path)
           # is there a better way to do this?
@@ -159,7 +192,18 @@ module Rack
             computed_to.gsub!("$#{num}", match(path)[num].to_s)
           end
           return computed_to
-        end        
+        end
+        
+        # Construct the URL (without domain) from PATH_INFO and QUERY_STRING
+        def build_path_from_env(env)
+          path = env['PATH_INFO']
+          path += "?#{env['QUERY_STRING']}" unless env['QUERY_STRING'].nil? || env['QUERY_STRING'].empty?
+          path
+        end
+        
+        def redirect_message(location)
+          %Q(Redirecting to <a href="#{location}">#{location}</a>)
+        end
     end
   end
 end

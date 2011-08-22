@@ -14,8 +14,8 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 
 === Sample rackup file
   
-  gem 'rack-rewrite', '~> 0.2.1'
-  require 'rack-rewrite
+  gem 'rack-rewrite', '~> 1.0.0'
+  require 'rack/rewrite'
   use Rack::Rewrite do
     rewrite '/wiki/John_Trupiano', '/john'
     r301 '/wiki/Yair_Flicker', '/yair'
@@ -24,8 +24,8 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
   end
 
 === Sample usage in a rails app
-  config.gem 'rack-rewrite', '~> 0.2.1'
-  require 'rack-rewrite
+  config.gem 'rack-rewrite', '~> 1.0.0'
+  require 'rack/rewrite'
   config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
     rewrite '/wiki/John_Trupiano', '/john'
     r301 '/wiki/Yair_Flicker', '/yair'
@@ -89,7 +89,7 @@ We can replace the mod_rewrite rules with the following Rack::Rewrite rule:
 
   maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
   send_file /.*/, maintenance_file, :if => Proc.new { |rack_env|
-    File.exists?(maintenance_file) && rack_env['REQUEST_URI'] !~ /\.(css|jpg|png)/
+    File.exists?(maintenance_file) && rack_env['PATH_INFO'] !~ /\.(css|jpg|png)/
   }
 
 If you're running Ruby 1.9, this rule is simplified:
@@ -111,9 +111,10 @@ get away with:
 
 === :rewrite
 
-Calls to #rewrite will simply update the PATH_INFO and REQUEST_URI HTTP header
-values and pass the request onto the next chain in the Rack stack.  The URL
-that a user's browser will show will not be changed.  See these examples:
+Calls to #rewrite will simply update the PATH_INFO, QUERY_STRING and 
+REQUEST_URI HTTP header values and pass the request onto the next chain in 
+the Rack stack.  The URL that a user's browser will show will not be changed.  
+See these examples:
 
   rewrite '/wiki/John_Trupiano', '/john'   # [1]
   rewrite %r{/wiki/(\w+)_\w+}, '/$1'       # [2]
@@ -167,6 +168,25 @@ capture group and substitution pattern in your rewrite rule to achieve this.
   
 This rule will store the querystring in a capture group (via '(?.*)' ) and
 will substitute the querystring back into the rewritten URL (via $1).
+
+=== Matching on a host
+
+Using the :host option you can match requests to a specific hostname.
+
+  r301 "/features", "/facial_features", :host => "facerecognizer.com"
+
+This rule will only match when the hostname is "facerecognizer.com"
+
+=== Restrict rule to HTTP methods (GET, POST, PUT, DELETE, etc)
+
+In certain scenarios you will want to restrict your rules by the HTTP method
+of a given request.  rack-rewrite exposes the :method option for this purpose.
+
+  # redirect GET's one way
+  r301 "/players", "/current_players", :method => :get
+
+  # and redirect POST's another way
+  r302 "/players", "/no_longer_available.html?message=No&longer&supported", :method => :post
 
 === Rule Guards
 

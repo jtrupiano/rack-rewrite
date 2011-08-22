@@ -1,3 +1,24 @@
+=== 1.1.0 / 2011-08-15
+* API
+  * :host and :method option to match SERVER_NAME and REQUEST_METHOD env params.
+  * :not option to negative match against path.
+* Maintenance
+  * Refactored internals a bit.
+
+=== 1.0.2 / 2010-10-01
+* Maintenance
+  * :send_file rules return content in an Array for Ruby 1.9.2 compatibility
+
+=== 1.0.1 / 2010-09-17
+* Maintenance
+  * Set Content-Type based on file extension of file/location being redirected to.  Addresses GitHub Issue #8.
+
+=== 1.0.0 / 2010-05-13
+* API
+  * Fix rack 1.1.0 / rails3 compatibility by eliminating reliance on REQUEST_URI env param.  Paths are now constructed with PATH_INFO and QUERY_STRING
+  * Follow rack directory/require convention: require 'rack/rewrite' instead of 'rack-rewrite'
+  * Include an HTML anchor tag linked to where the URL being redirected to in the body of 301's and 302's
+
 === 0.2.1 / 2010-01-06
 * API
   * Implement $& substitution pattern (thanks to {Ben Brinckerhoff}[http://github.com/bhb])
