@@ -40,7 +40,7 @@ class RuleTest < Test::Unit::TestCase
         rule = Rack::Rewrite::Rule.new(status, %r{/pink_dragons}, '/ruby_dragons')
         env = {'PATH_INFO' => '/pink_dragons', 'REQUEST_URI' => '/pink_dragons', 'rack.errors' => MockLogger.new}
         rule.apply!(env)
-        assert_equal "[INFO] rack-rewrite: [#{code}] Redirecting from /\\/pink_dragons/ to /ruby_dragons", env['rack.errors'].logs.first
+        assert_equal "[INFO] rack-rewrite: [#{code}] Redirecting from /\\/pink_dragons/ to /ruby_dragons\n", env['rack.errors'].logs.first
       end
     end
 
@@ -48,7 +48,7 @@ class RuleTest < Test::Unit::TestCase
       rule = Rack::Rewrite::Rule.new(:rewrite, '/pink_dragons', '/ruby_dragons')
       env = {'PATH_INFO' => '/pink_dragons', 'REQUEST_URI' => '/pink_dragons', 'rack.errors' => MockLogger.new}
       rule.apply!(env)
-      assert_equal '[INFO] rack-rewrite: [200] Rewriting from "/pink_dragons" to /ruby_dragons', env['rack.errors'].logs.first
+      assert_equal "[INFO] rack-rewrite: [200] Rewriting from \"/pink_dragons\" to /ruby_dragons\n", env['rack.errors'].logs.first
     end
     
     should "verify that logs are working for rewrite using rack.logger" do

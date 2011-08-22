@@ -151,7 +151,7 @@ module Rack
           if env['rack.logger']
             env['rack.logger'].info(message) #this is the right way but rails doesn't impliment this
           else
-            env['rack.errors'].write(message)
+            env['rack.errors'].write("#{message}\n")
           end
         end
           
