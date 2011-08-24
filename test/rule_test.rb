@@ -175,7 +175,7 @@ class RuleTest < Test::Unit::TestCase
         assert @rule.matches?(rack_env_for("/features", "SERVER_NAME" => "127.0.0.1", "SERVER_PORT" => "8080", "HTTP_X_FORWARDED_HOST" => "testapp.com"))
       end
 
-      should 'match PATH_INFO of /features AND HTTP_X_FORWARDED_HOST of nottestapp.com and SERVER_NAME of 127.0.0.1' do
+      should 'not match PATH_INFO of /features AND HTTP_X_FORWARDED_HOST of nottestapp.com and SERVER_NAME of 127.0.0.1' do
         assert !@rule.matches?(rack_env_for("/features", "SERVER_NAME" => "127.0.0.1", "SERVER_PORT" => "8080", "HTTP_X_FORWARDED_HOST" => "nottestapp.com"))
       end
     end
