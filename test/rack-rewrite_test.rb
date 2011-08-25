@@ -68,6 +68,18 @@ class RackRewriteTest < Test::Unit::TestCase
       end
     end
     
+    [[:moved_permanently, 301], [:found, 302], [:see_other, 303], [:temporary_redirect, 307]].each do |rule|
+      context "when a #{rule.first} rule matches" do
+        setup {
+          @rack = Rack::Rewrite.new(@app) do
+            send(rule.first, '/wiki/Yair_Flicker', '/yair')
+          end
+        }
+        should_halt
+        should_location_redirect_to('/yair', rule.last)
+      end
+    end
+    
     context 'when a rewrite rule matches' do
       setup {
         @rack = Rack::Rewrite.new(@app) do
