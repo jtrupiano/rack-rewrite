@@ -33,28 +33,58 @@ class RuleTest < Test::Unit::TestCase
     end
   end
   
+  context "#Rule#log" do
+    should "verify that logs are working for r301 and r302" do
+      
+      {:r301 => 301, :r302 => 302}.each do |status, code|
+        rule = Rack::Rewrite::Rule.new(status, %r{/pink_dragons}, '/ruby_dragons')
+        env = {'PATH_INFO' => '/pink_dragons', 'REQUEST_URI' => '/pink_dragons', 'rack.errors' => MockLogger.new}
+        rule.apply!(env)
+        assert_equal "[INFO] rack-rewrite: [#{code}] Redirecting from /\\/pink_dragons/ to /ruby_dragons\n", env['rack.errors'].logs.first
+      end
+    end
+
+    should "verify that logs are working for rewrite" do
+      rule = Rack::Rewrite::Rule.new(:rewrite, '/pink_dragons', '/ruby_dragons')
+      env = {'PATH_INFO' => '/pink_dragons', 'REQUEST_URI' => '/pink_dragons', 'rack.errors' => MockLogger.new}
+      rule.apply!(env)
+      assert_equal "[INFO] rack-rewrite: [200] Rewriting from \"/pink_dragons\" to /ruby_dragons\n", env['rack.errors'].logs.first
+    end
+    
+    should "verify that logs are working for rewrite using rack.logger" do
+      rule = Rack::Rewrite::Rule.new(:rewrite, '/pink_dragons', '/ruby_dragons')
+      env = {'PATH_INFO' => '/pink_dragons', 'REQUEST_URI' => '/pink_dragons', 'rack.logger' => MockLogger.new}
+      rule.apply!(env)
+      assert_equal '[INFO] rack-rewrite: [200] Rewriting from "/pink_dragons" to /ruby_dragons', env['rack.logger'].logs.first
+    end
+    
+  end
+  
+  
+  
   context '#Rule#apply' do
+    
     should 'set Location header to result of #interpret_to for a 301' do
       rule = Rack::Rewrite::Rule.new(:r301, %r{/abc}, '/def')
-      env = {'PATH_INFO' => '/abc'}
+      env = {'PATH_INFO' => '/abc', 'rack.errors' => MockLogger.new}
       assert_equal rule.send(:interpret_to, '/abc'), rule.apply!(env)[1]['Location']
     end
     
     should 'include a link to the result of #interpret_to for a 301' do
       rule = Rack::Rewrite::Rule.new(:r301, %r{/abc}, '/def')
-      env = {'PATH_INFO' => '/abc'}
+      env = {'PATH_INFO' => '/abc', 'rack.errors' => MockLogger.new}
       assert_match /\/def/, rule.apply!(env)[2][0]
     end
     
     should 'keep the QUERY_STRING when a 301 rule matches a URL with a querystring' do
       rule = Rack::Rewrite::Rule.new(:r301, %r{/john(.*)}, '/yair$1')
-      env = {'PATH_INFO' => '/john', 'QUERY_STRING' => 'show_bio=1'}
+      env = {'PATH_INFO' => '/john', 'QUERY_STRING' => 'show_bio=1', 'rack.errors' => MockLogger.new}
       assert_equal '/yair?show_bio=1', rule.apply!(env)[1]['Location']
     end
     
     should 'keep the QUERY_STRING when a rewrite rule that requires a querystring matches a URL with a querystring' do
       rule = Rack::Rewrite::Rule.new(:rewrite, %r{/john(\?.*)}, '/yair$1')
-      env = {'PATH_INFO' => '/john', 'QUERY_STRING' => 'show_bio=1'}
+      env = {'PATH_INFO' => '/john', 'QUERY_STRING' => 'show_bio=1', 'rack.errors' => MockLogger.new}
       rule.apply!(env)
       assert_equal '/yair', env['PATH_INFO']
       assert_equal 'show_bio=1', env['QUERY_STRING']
@@ -63,7 +93,7 @@ class RuleTest < Test::Unit::TestCase
     
     should 'update the QUERY_STRING when a rewrite rule changes its value' do
       rule = Rack::Rewrite::Rule.new(:rewrite, %r{/(\w+)\?show_bio=(\d)}, '/$1?bio=$2')
-      env = {'PATH_INFO' => '/john', 'QUERY_STRING' => 'show_bio=1'}
+      env = {'rack.errors' => MockLogger.new, 'PATH_INFO' => '/john', 'QUERY_STRING' => 'show_bio=1'} 
       rule.apply!(env)
       assert_equal '/john', env['PATH_INFO']
       assert_equal 'bio=1', env['QUERY_STRING']
@@ -73,7 +103,7 @@ class RuleTest < Test::Unit::TestCase
     should 'set Content-Type header to text/html for a 301 and 302 request for a .html page' do
       [:r301, :r302].each do |rule_type|
         rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def.html')
-        env = {'PATH_INFO' => '/abc'}
+        env = {'PATH_INFO' => '/abc', 'rack.errors' => MockLogger.new}
         assert_equal 'text/html', rule.apply!(env)[1]['Content-Type']
       end
     end
@@ -81,7 +111,7 @@ class RuleTest < Test::Unit::TestCase
     should 'set Content-Type header to text/css for a 301 and 302 request for a .css page' do
       [:r301, :r302].each do |rule_type|
         rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def.css')
-        env = {'PATH_INFO' => '/abc'}
+        env = {'PATH_INFO' => '/abc', 'rack.errors' => MockLogger.new}
         assert_equal 'text/css', rule.apply!(env)[1]['Content-Type']
       end      
     end
@@ -90,8 +120,8 @@ class RuleTest < Test::Unit::TestCase
       setup do
         @file = File.join(TEST_ROOT, 'geminstaller.yml')
         @rule = Rack::Rewrite::Rule.new(:x_send_file, /.*/, @file)
-        env = {'PATH_INFO' => '/abc'}
-        @response = @rule.apply!(env)
+        @env = {'PATH_INFO' => '/abc', 'rack.errors' => MockLogger.new}
+        @response = @rule.apply!(@env)
       end
       
       should 'return 200' do
@@ -113,14 +143,18 @@ class RuleTest < Test::Unit::TestCase
       should 'return empty content' do
         assert_equal [], @response[2]
       end
+      
+      should 'log that a x-sendfile was requested' do
+        assert @env['rack.errors'].logs.first.include?("[INFO] rack-rewrite: [200] X-Sendfile from /.*/ to")
+      end
     end
     
     context 'Given a :send_file rule that matches' do
       setup do
         @file = File.join(TEST_ROOT, 'geminstaller.yml')
         @rule = Rack::Rewrite::Rule.new(:send_file, /.*/, @file)
-        env = {'PATH_INFO' => '/abc'}
-        @response = @rule.apply!(env)
+        @env = {'PATH_INFO' => '/abc', 'rack.errors' => MockLogger.new}
+        @response = @rule.apply!(@env)
       end
       
       should 'return 200' do
@@ -141,6 +175,10 @@ class RuleTest < Test::Unit::TestCase
       
       should 'return the contents of geminstaller.yml in an array for Ruby 1.9.2 compatibility' do
         assert_equal [File.read(@file)], @response[2]
+      end
+      
+      should 'log that a sendfile was requested' do
+        assert @env['rack.errors'].logs.first.include?("[INFO] rack-rewrite: [200] Send File from /.*/ to")
       end
     end
   end
@@ -292,7 +330,7 @@ class RuleTest < Test::Unit::TestCase
       end
       
       should 'match requests for domain myolddomain.com and redirect to mynewdomain.com' do
-        env = {'PATH_INFO' => '/anything', 'QUERY_STRING' => 'abc=1', 'SERVER_NAME' => 'myolddomain.com'}
+        env = {'PATH_INFO' => '/anything', 'QUERY_STRING' => 'abc=1', 'SERVER_NAME' => 'myolddomain.com', 'rack.errors' => MockLogger.new}
         assert @rule.matches?(env)
         rack_response = @rule.apply!(env)
         assert_equal 'http://mynewdomain.com/anything?abc=1', rack_response[1]['Location']

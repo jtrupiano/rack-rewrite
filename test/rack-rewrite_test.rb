@@ -3,11 +3,11 @@ require 'test_helper'
 class RackRewriteTest < Test::Unit::TestCase
 
   def call_args(overrides={})
-    {'REQUEST_URI' => '/wiki/Yair_Flicker', 'PATH_INFO' => '/wiki/Yair_Flicker', 'QUERY_STRING' => ''}.merge(overrides)
+    {'REQUEST_URI' => '/wiki/Yair_Flicker', 'PATH_INFO' => '/wiki/Yair_Flicker', 'QUERY_STRING' => '', 'rack.errors' => MockLogger.new}.merge(overrides)
   end
   
   def call_args_no_req(overrides={})
-    {'PATH_INFO' => '/wiki/Yair_Flicker', 'QUERY_STRING' => ''}.merge(overrides)
+    {'PATH_INFO' => '/wiki/Yair_Flicker', 'QUERY_STRING' => '', 'rack.errors' => MockLogger.new}.merge(overrides)
   end
   
   def self.should_not_halt
