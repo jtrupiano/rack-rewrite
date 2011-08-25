@@ -33,6 +33,22 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
     r301 %r{/wiki/(\w+)_\w+}, '/$1'
   end
 
+== Redirection codes
+
+All +redirect+ status codes from the HTTP spec[http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html] are supported:
+
+* 301 moved permanently
+* 302 found
+* 303 see other
+* 307 temporary redirect
+
+The 303 and 307 codes were added to the spec to make unambiguously clear what
+clients should do with the request method. 303 means that the new request should
+always be made via GET. 307 means that the new request should use the same method as
+the original request. Status code 302 was left as it is, since it was already
+in use by the time the issues with the method came to light. In practice it
+behaves the same as 303.
+
 == Use Cases
 
 === Rebuild of existing site in a new technology
