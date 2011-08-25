@@ -76,6 +76,26 @@ class RackRewriteTest < Test::Unit::TestCase
       should_location_redirect_to('/yair', 302)
     end
     
+    context 'when a 303 rule matches' do
+      setup {
+        @rack = Rack::Rewrite.new(@app) do
+          r303 '/wiki/Yair_Flicker', '/yair'
+        end
+      }
+      should_halt
+      should_location_redirect_to('/yair', 303)
+    end
+    
+    context 'when a 307 rule matches' do
+      setup {
+        @rack = Rack::Rewrite.new(@app) do
+          r307 '/wiki/Yair_Flicker', '/yair'
+        end
+      }
+      should_halt
+      should_location_redirect_to('/yair', 307)
+    end
+    
     context 'when a rewrite rule matches' do
       setup {
         @rack = Rack::Rewrite.new(@app) do
