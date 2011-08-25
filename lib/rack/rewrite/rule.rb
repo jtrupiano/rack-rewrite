@@ -115,13 +115,13 @@ module Rack
         interpreted_to = self.interpret_to(env)
         additional_headers = @options[:headers] || {}
         case self.rule_type
-        when :r301, :moved_permanently
+        when :r301
           [301, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
-        when :r302, :found
+        when :r302
           [302, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
-        when :r303, :see_other
+        when :r303
           [303, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
-        when :r307, :temporary_redirect
+        when :r307
           [307, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
         when :rewrite
           # return [200, {}, {:content => env.inspect}]
