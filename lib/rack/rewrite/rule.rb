@@ -39,6 +39,22 @@ module Rack
           add_rule :r302, *args
         end
         
+        # Creates a redirect rule that will send a 303 when matching.
+        #
+        #  r303 '/wiki/John_Trupiano', '/john'
+        #  r303 '/wiki/(.*)', 'http://www.google.com/?q=$1'
+        def r303(*args)
+          add_rule :r303, *args
+        end
+        
+        # Creates a redirect rule that will send a 307 when matching.
+        #
+        #  r307 '/wiki/John_Trupiano', '/john'
+        #  r307 '/wiki/(.*)', 'http://www.google.com/?q=$1'
+        def r307(*args)
+          add_rule :r307, *args
+        end
+        
         # Creates a rule that will render a file if matched.
         #
         #  send_file /*/, 'public/system/maintenance.html', 
@@ -87,6 +103,10 @@ module Rack
           [301, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
         when :r302
           [302, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
+        when :r303
+          [303, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
+        when :r307
+          [307, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
         when :rewrite
           # return [200, {}, {:content => env.inspect}]
           env['REQUEST_URI'] = interpreted_to
