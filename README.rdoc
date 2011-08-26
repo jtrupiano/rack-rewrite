@@ -42,11 +42,27 @@ All +redirect+ status codes from the HTTP spec[http://www.w3.org/Protocols/rfc26
 * 303 see other
 * 307 temporary redirect
 
-The 303 and 307 codes were added to the spec to make unambiguously clear what
-clients should do with the request method. 303 means that the new request should
-always be made via GET. 307 means that the new request should use the same method as
-the original request. Status code 302 was left as it is, since it was already
-in use by the time the issues with the method came to light. In practice it
+These translate to the following methods inside the Rack::Rewrite block:
+
+  r301                '/wiki/John_Trupiano', '/john'
+  moved_permanently   '/wiki/John_Trupiano', '/john'
+  p                   '/wiki/John_Trupiano', '/john'    # shortcut alias
+  
+  r302                '/wiki/John_Trupiano', '/john'
+  found               '/wiki/John_Trupiano', '/john'
+  
+  r303                '/wiki/John_Trupiano', '/john'
+  see_other           '/wiki/John_Trupiano', '/john'
+  
+  r307                '/wiki/John_Trupiano', '/john'
+  temporary_redirect  '/wiki/John_Trupiano', '/john'
+  t                   '/wiki/John_Trupiano', '/john'    # shortcut alias
+
+The 303 and 307 codes were added to the HTTP spec to make unambiguously clear
+what clients should do with the request method. 303 means that the new request
+should always be made via GET. 307 means that the new request should use the
+same method as the original request. Status code 302 was left as it is, since
+it was already in use by the time these issues came to light. In practice it
 behaves the same as 303.
 
 == Use Cases
