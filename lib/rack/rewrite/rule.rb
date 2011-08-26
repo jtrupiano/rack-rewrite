@@ -28,12 +28,13 @@ module Rack
         #  r301 '/wiki/John_Trupiano', '/john'
         #  r301 '/contact-us.php', '/contact-us'
         #
-        # You can use +moved_permanently+ instead of +r301+.
+        # You can use +moved_permanently+ or just +p+ instead of +r301+.
         def r301(*args)
           add_rule :r301, *args
         end
         
         alias :moved_permanently :r301
+        alias :p :r301
         
         # Creates a redirect rule that will send a 302 when matching.
         #
@@ -64,12 +65,13 @@ module Rack
         #  r307 '/wiki/John_Trupiano', '/john'
         #  r307 '/wiki/(.*)', 'http://www.google.com/?q=$1'
         #
-        # You can use +temporary_redirect+ instead of +r307+.
+        # You can use +temporary_redirect+ or +t+ instead of +r307+.
         def r307(*args)
           add_rule :r307, *args
         end
         
         alias :temporary_redirect :r307
+        alias :t :r307
         
         # Creates a rule that will render a file if matched.
         #
