@@ -17,20 +17,20 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
   gem 'rack-rewrite', '~> 1.0.0'
   require 'rack/rewrite'
   use Rack::Rewrite do
-    rewrite '/wiki/John_Trupiano', '/john'
-    r301 '/wiki/Yair_Flicker', '/yair'
-    r302 '/wiki/Greg_Jastrab', '/greg'
-    r301 %r{/wiki/(\w+)_\w+}, '/$1'
+    rewrite   '/wiki/John_Trupiano', '/john'
+    r301      '/wiki/Yair_Flicker', '/yair'
+    r302      '/wiki/Greg_Jastrab', '/greg'
+    r301      %r{/wiki/(\w+)_\w+}, '/$1'
   end
 
 === Sample usage in a rails app
   config.gem 'rack-rewrite', '~> 1.0.0'
   require 'rack/rewrite'
   config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
-    rewrite '/wiki/John_Trupiano', '/john'
-    r301 '/wiki/Yair_Flicker', '/yair'
-    r302 '/wiki/Greg_Jastrab', '/greg'
-    r301 %r{/wiki/(\w+)_\w+}, '/$1'
+    rewrite   '/wiki/John_Trupiano', '/john'
+    r301      '/wiki/Yair_Flicker', '/yair'
+    r302      '/wiki/Greg_Jastrab', '/greg'
+    r301      %r{/wiki/(\w+)_\w+}, '/$1'
   end
 
 == Redirection codes
