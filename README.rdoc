@@ -17,20 +17,20 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
   gem 'rack-rewrite', '~> 1.0.0'
   require 'rack/rewrite'
   use Rack::Rewrite do
-    rewrite   '/wiki/John_Trupiano', '/john'
-    r301      '/wiki/Yair_Flicker', '/yair'
-    r302      '/wiki/Greg_Jastrab', '/greg'
-    r301      %r{/wiki/(\w+)_\w+}, '/$1'
+    rewrite   '/wiki/John_Trupiano',  '/john'
+    r301      '/wiki/Yair_Flicker',   '/yair'
+    r302      '/wiki/Greg_Jastrab',   '/greg'
+    r301      %r{/wiki/(\w+)_\w+},    '/$1'
   end
 
 === Sample usage in a rails app
   config.gem 'rack-rewrite', '~> 1.0.0'
   require 'rack/rewrite'
   config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
-    rewrite   '/wiki/John_Trupiano', '/john'
-    r301      '/wiki/Yair_Flicker', '/yair'
-    r302      '/wiki/Greg_Jastrab', '/greg'
-    r301      %r{/wiki/(\w+)_\w+}, '/$1'
+    rewrite   '/wiki/John_Trupiano',  '/john'
+    r301      '/wiki/Yair_Flicker',   '/yair'
+    r302      '/wiki/Greg_Jastrab',   '/greg'
+    r301      %r{/wiki/(\w+)_\w+},    '/$1'
   end
 
 == Redirection codes
@@ -162,11 +162,11 @@ and rewrite them as the first name only.  This is an actual catch-all rule we
 applied when we rebuilt our website in September 2009 
 ( http://www.smartlogicsolutions.com ).
 
-=== :r301, :302
+=== :r301, :r302, :r303, :r307
 
 Calls to #r301 and #r302 have the same signature as #rewrite.  The difference,
 however, is that these actually short-circuit the rack stack and send back
-301's and 302's, respectively.  See these examples:
+their respective status codes.  See these examples:
 
   r301 '/wiki/John_Trupiano', '/john'                # [1]
   r301 '/wiki/(.*)', 'http://www.google.com/?q=$1'   # [2]
