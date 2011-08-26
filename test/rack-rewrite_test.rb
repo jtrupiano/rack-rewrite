@@ -68,7 +68,7 @@ class RackRewriteTest < Test::Unit::TestCase
       end
     end
     
-    [[:moved_permanently, 301], [:found, 302], [:see_other, 303], [:temporary_redirect, 307]].each do |rule|
+    [[:p, 301], [:moved_permanently, 301], [:found, 302], [:see_other, 303], [:t, 307], [:temporary_redirect, 307]].each do |rule|
       context "when a #{rule.first} rule matches" do
         setup {
           @rack = Rack::Rewrite.new(@app) do
