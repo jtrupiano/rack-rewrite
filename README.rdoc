@@ -156,6 +156,58 @@ to be rendered instead of passing the application call up the rack stack.
     File.exists?('public/blog_offline.htm')
   }
 
+== Options Parameter
+
+Each rewrite rule takes an optional options parameter.  The following options
+are supported.
+
+=== :host
+
+Using the :host option you can match requests to a specific hostname.
+
+  r301 "/features", "/facial_features", :host => "facerecognizer.com"
+
+This rule will only match when the hostname is "facerecognizer.com"
+
+=== :headers
+
+Using the :headers option you can set custom response headers e.g. for HTTP 
+caching instructions.
+
+  r301 "/features", "/facial_features", :headers => {'Cache-Control' => 'no-cache'}
+
+=== :method
+
+Using the :method option you can restrict the matching of a rule by the HTTP 
+method of a given request.
+
+  # redirect GET's one way
+  r301 "/players", "/current_players", :method => :get
+
+  # and redirect POST's another way
+  r302 "/players", "/no_longer_available.html?message=No&longer&supported", :method => :post
+
+=== :if
+
+Using the :if option you can define arbitrary rule guards.  Guards are any
+object responding to #call that return true or false indicating whether the 
+rule matches.  The following example demonstrates how the presence of a 
+maintenance page on the filesystem can be utilized to take your site(s) offline.
+
+  maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
+  x_send_file /.*/, maintenance_file, :if => Proc.new { |rack_env| 
+    File.exists?(maintenance_file)
+  }
+
+=== :not
+
+Using the :not option you can negatively match against the path.  This can
+be useful when writing a regular expression match is difficult.
+
+  rewrite %r{^\/features}, '/facial_features', :not => '/features'
+
+This will not match the relative URL /features but would match /features.xml.
+
 == Tips
 
 === Keeping your querystring
@@ -169,45 +221,6 @@ capture group and substitution pattern in your rewrite rule to achieve this.
 This rule will store the querystring in a capture group (via '(?.*)' ) and
 will substitute the querystring back into the rewritten URL (via $1).
 
-=== Custom response headers
-
-Using the :headers option you can set custom response headers e.g. for HTTP caching instructions.
-
-  r301 "/features", "/facial_features", :headers => {'Cache-Control' => 'no-cache'}
-
-This option applies to redirect and sendfile rules.
-
-=== Matching on a host
-
-Using the :host option you can match requests to a specific hostname.
-
-  r301 "/features", "/facial_features", :host => "facerecognizer.com"
-
-This rule will only match when the hostname is "facerecognizer.com"
-
-=== Restrict rule to HTTP methods (GET, POST, PUT, DELETE, etc)
-
-In certain scenarios you will want to restrict your rules by the HTTP method
-of a given request.  rack-rewrite exposes the :method option for this purpose.
-
-  # redirect GET's one way
-  r301 "/players", "/current_players", :method => :get
-
-  # and redirect POST's another way
-  r302 "/players", "/no_longer_available.html?message=No&longer&supported", :method => :post
-
-=== Rule Guards
-
-All rules support passing guards as Procs/lambdas.  Guards simply return
-true or false indicating whether the rule declaration is a match.  The
-following example demonstrates how the presence of a maintenance page
-on the filesystem can be utilized to take your site(s) offline.
-
-  maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
-  x_send_file /.*/, maintenance_file, :if => Proc.new { |rack_env| 
-    File.exists?(maintenance_file)
-  }
-
 === Arbitrary Rewriting
 
 All rules support passing a Proc as the second argument allowing you to
@@ -220,4 +233,4 @@ received between 12AM and 8AM to an unavailable page.
   
 == Copyright
 
-Copyright (c) 2009-2010 John Trupiano. See LICENSE for details.
+Copyright (c) 2009-2011 John Trupiano. See LICENSE for details.
