@@ -1,5 +1,8 @@
-Update History.txt with relevant details
-Manually edit .gemspec updating file list, version, and date.
+Bump VERSION
+Update version references in README
+Update History.rdoc with relevant details
+Manually edit file list in .gemspec if necessary.
+Commit these edits in its own commit "Bumping to version x.x.x"
 Tag the new version (git tag -a vX.X.X && git push --tags)
 Build and push the gem (gem build rack-rewrite.gemspec && gem push rack-rewrite-X.X.X.gem)
 Bump the gem version to the next dot release with a prerelease (1.1.1 --> 1.1.2.a)
