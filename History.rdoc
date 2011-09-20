@@ -1,3 +1,7 @@
+=== 1.2.0 / 2011-09--20
+* API
+  * :headers option to send additional headers with the response
+
 === 1.1.0 / 2011-08-15
 * API
   * :host and :method option to match SERVER_NAME and REQUEST_METHOD env params.
