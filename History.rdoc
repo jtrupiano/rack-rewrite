@@ -1,4 +1,8 @@
-=== 1.2.0 / 2011-09--20
+=== 1.2.1 / 2011-09-20
+* Maintenance
+  * Use Rack::Request to match the host
+
+=== 1.2.0 / 2011-09-20
 * API
   * :headers option to send additional headers with the response
 
