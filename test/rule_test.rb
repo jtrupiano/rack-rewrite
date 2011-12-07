@@ -228,9 +228,17 @@ class RuleTest < Test::Unit::TestCase
       end
     end
     
-    should 'match with the ^ operator for regexps' do
-      rule = Rack::Rewrite::Rule.new(:rewrite, %r{^/jason}, '/steve')
-      assert rule.matches?(rack_env_for('/jason'))
+    context 'Given a rule with the ^ operator' do
+      setup do
+        @rule = Rack::Rewrite::Rule.new(:rewrite, %r{^/jason}, '/steve')
+      end
+      should 'match with the ^ operator if match is at the beginning of the path' do
+        assert @rule.matches?(rack_env_for('/jason'))
+      end
+    
+      should 'not match with the ^ operator when match is deeply nested' do
+        assert !@rule.matches?(rack_env_for('/foo/bar/jason'))
+      end
     end
         
     context 'Given any rule with a "from" regular expression of /features(.*)' do
