@@ -5,10 +5,15 @@ module Rack
   # A rack middleware for defining and applying rewrite rules. In many cases you 
   # can get away with rack-rewrite instead of writing Apache mod_rewrite rules.  
   class Rewrite
-    def initialize(app, &rule_block)
+    def initialize(app, options = {}, &rule_block)
       @app = app
       @rule_set = RuleSet.new
       @rule_set.instance_eval(&rule_block) if block_given?
+
+      rules_file = ::File.expand_path(options[:rules])
+      if ::File.exists?(rules_file)
+        @rule_set.instance_eval(::File.read(rules_file))
+      end
     end
     
     def call(env)
