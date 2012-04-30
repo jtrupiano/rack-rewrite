@@ -93,6 +93,28 @@ class RuleTest < Test::Unit::TestCase
         assert_equal 'no-cache', rule.apply!(env)[1]['Cache-Control']
       end      
     end
+
+    should 'evaluate additional headers block once per redirect request' do
+      [:r301, :r302].each do |rule_type|
+        header_val = 'foo'
+        rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def.css', {:headers => lambda { {'X-Foobar' => header_val} } })
+        env = {'PATH_INFO' => '/abc'}
+        assert_equal 'foo', rule.apply!(env)[1]['X-Foobar']
+        header_val = 'bar'
+        assert_equal 'bar', rule.apply!(env)[1]['X-Foobar']
+      end
+    end
+
+    should 'evaluate additional headers block once per send file request' do
+      [:send_file, :x_send_file].each do |rule_type|
+        header_val = 'foo'
+        rule = Rack::Rewrite::Rule.new(rule_type, /.*/, File.join(TEST_ROOT, 'geminstaller.yml'), {:headers => lambda { {'X-Foobar' => header_val} } })
+        env = {'PATH_INFO' => '/abc'}
+        assert_equal 'foo', rule.apply!(env)[1]['X-Foobar']
+        header_val = 'bar'
+        assert_equal 'bar', rule.apply!(env)[1]['X-Foobar']
+      end
+    end
     
     context 'Given an :x_send_file rule that matches' do
       setup do
@@ -121,7 +143,7 @@ class RuleTest < Test::Unit::TestCase
       should 'return additional headers' do
         assert_equal 'no-cache', @response[1]['Cache-Control']
       end
-      
+
       should 'return empty content' do
         assert_equal [], @response[2]
       end

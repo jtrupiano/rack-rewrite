@@ -14,7 +14,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.0.10)
+  bundler
   mocha (~> 0.9.7)
   rack
   rack-rewrite!
