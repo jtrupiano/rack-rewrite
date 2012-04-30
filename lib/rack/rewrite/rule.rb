@@ -115,7 +115,14 @@ module Rack
       # (b) alter env as necessary and return true
       def apply!(env) #:nodoc:
         interpreted_to = self.interpret_to(env)
-        additional_headers = @options[:headers] || {}
+        additional_headers = {}
+        if @options[:headers]
+          if @options[:headers].respond_to?(:call)
+            additional_headers = @options[:headers].call || {}
+          else
+            additional_headers = @options[:headers] || {}
+          end
+        end
         case self.rule_type
         when :r301
           [301, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
