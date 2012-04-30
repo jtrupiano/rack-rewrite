@@ -4,3 +4,7 @@ coverage
 rdoc
 pkg
 rack-rewrite-*.gem
+.bundle
+.idea
+*.iml
+vendor
