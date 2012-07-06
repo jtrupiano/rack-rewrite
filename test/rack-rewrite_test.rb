@@ -56,24 +56,28 @@ class RackRewriteTest < Test::Unit::TestCase
       should_not_halt
     end
     
-    context 'when a 301 rule matches' do
-      setup {
-        @rack = Rack::Rewrite.new(@app) do
-          r301 '/wiki/Yair_Flicker', '/yair'
-        end
-      }
-      should_halt
-      should_location_redirect_to('/yair', 301)
+    [301, 302, 303, 307].each do |status|
+      context "when a #{status} rule matches" do
+        setup {
+          @rack = Rack::Rewrite.new(@app) do
+            send("r#{status}", '/wiki/Yair_Flicker', '/yair')
+          end
+        }
+        should_halt
+        should_location_redirect_to('/yair', status)
+      end
     end
     
-    context 'when a 302 rule matches' do
-      setup {
-        @rack = Rack::Rewrite.new(@app) do
-          r302 '/wiki/Yair_Flicker', '/yair'
-        end
-      }
-      should_halt
-      should_location_redirect_to('/yair', 302)
+    [[:p, 301], [:moved_permanently, 301], [:found, 302], [:see_other, 303], [:t, 307], [:temporary_redirect, 307]].each do |rule|
+      context "when a #{rule.first} rule matches" do
+        setup {
+          @rack = Rack::Rewrite.new(@app) do
+            send(rule.first, '/wiki/Yair_Flicker', '/yair')
+          end
+        }
+        should_halt
+        should_location_redirect_to('/yair', rule.last)
+      end
     end
     
     context 'when a rewrite rule matches' do

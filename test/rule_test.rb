@@ -34,16 +34,20 @@ class RuleTest < Test::Unit::TestCase
   end
   
   context '#Rule#apply' do
-    should 'set Location header to result of #interpret_to for a 301' do
-      rule = Rack::Rewrite::Rule.new(:r301, %r{/abc}, '/def')
-      env = {'PATH_INFO' => '/abc'}
-      assert_equal rule.send(:interpret_to, '/abc'), rule.apply!(env)[1]['Location']
+    supported_status_codes.each do |rule_type|
+      should "set Location header to result of #interpret_to for a #{rule_type}" do
+        rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def')
+        env = {'PATH_INFO' => '/abc'}
+        assert_equal rule.send(:interpret_to, '/abc'), rule.apply!(env)[1]['Location']
+      end
     end
     
-    should 'include a link to the result of #interpret_to for a 301' do
-      rule = Rack::Rewrite::Rule.new(:r301, %r{/abc}, '/def')
-      env = {'PATH_INFO' => '/abc'}
-      assert_match /\/def/, rule.apply!(env)[2][0]
+    supported_status_codes.each do |rule_type|
+      should "include a link to the result of #interpret_to for a #{rule_type}" do
+        rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def')
+        env = {'PATH_INFO' => '/abc'}
+        assert_match /\/def/, rule.apply!(env)[2][0]
+      end
     end
     
     should 'keep the QUERY_STRING when a 301 rule matches a URL with a querystring' do
@@ -71,7 +75,7 @@ class RuleTest < Test::Unit::TestCase
     end
 
     should 'set Content-Type header to text/html for a 301 and 302 request for a .html page' do
-      [:r301, :r302].each do |rule_type|
+      supported_status_codes.each do |rule_type|
         rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def.html')
         env = {'PATH_INFO' => '/abc'}
         assert_equal 'text/html', rule.apply!(env)[1]['Content-Type']
@@ -79,7 +83,7 @@ class RuleTest < Test::Unit::TestCase
     end
     
     should 'set Content-Type header to text/css for a 301 and 302 request for a .css page' do
-      [:r301, :r302].each do |rule_type|
+      supported_status_codes.each do |rule_type|
         rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def.css')
         env = {'PATH_INFO' => '/abc'}
         assert_equal 'text/css', rule.apply!(env)[1]['Content-Type']
