@@ -31,6 +31,15 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
     r301 %r{/wiki/(\w+)_\w+}, '/$1'
   end
 
+=== Specify an external rules file AND additional rules in the block
+
+  config.middleware.insert_before(Rack::Lock, Rack::Rewrite, :rules => 'config/rules.rb') do
+    rewrite '/wiki/John_Trupiano', '/john'
+    r301 '/wiki/Yair_Flicker', '/yair'
+    r302 '/wiki/Greg_Jastrab', '/greg'
+    r301 %r{/wiki/(\w+)_\w+}, '/$1'
+  end
+
 == Use Cases
 
 === Rebuild of existing site in a new technology

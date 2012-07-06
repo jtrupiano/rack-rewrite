@@ -1,6 +1,5 @@
 * OUTSTANDING
   * Add :host support to restrict which URL's a rewrite rule matches [10/15/09]
-  * Add support for specifying a config file instead of passing a block (e.g. config/rewrite.rb) [10/15/09]
   * Provide testing helpers (e.g. should_rewrite) to facilitate straightforward testing. [10/25/09]
   * Allow rules to return arbitrary html (e.g. the contents of the maintenance page) [10/25/09]
 
