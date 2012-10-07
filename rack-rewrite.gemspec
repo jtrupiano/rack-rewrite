@@ -3,10 +3,10 @@ Gem::Specification.new do |s|
   s.version = File.read('VERSION')
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["John Trupiano"]
+  s.authors = ["Travis Jeffery", "John Trupiano"]
   s.date = Date.today.to_s
   s.description = %q{A rack middleware for enforcing rewrite rules. In many cases you can get away with rack-rewrite instead of writing Apache mod_rewrite rules.}
-  s.email = %q{jtrupiano@gmail.com}
+  s.email = %q{travisjeffery@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE",
     "History.rdoc",
@@ -43,7 +43,6 @@ Gem::Specification.new do |s|
     "test/rule_test.rb",
     "test/test_helper.rb"
   ]
-  #s.add_dependency 'rack'
   
   s.add_development_dependency 'bundler'
   s.add_development_dependency 'shoulda', '~> 2.10.2'

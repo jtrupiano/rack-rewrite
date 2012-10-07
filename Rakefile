@@ -1,7 +1,8 @@
 require 'rubygems'
 require 'rake'
-
 require 'rake/testtask'
+require 'rdoc/task'
+
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test' << '.'
   test.pattern = 'test/**/*_test.rb'
@@ -23,7 +24,6 @@ end
 
 task :default => :test
 
-require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
   if File.exist?('VERSION')
     version = File.read('VERSION')
