@@ -10,12 +10,11 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = [
     "LICENSE",
     "History.rdoc",
-    "README.rdoc"
   ]
   s.files = [
     "History.rdoc",
     "LICENSE",
-    "README.rdoc",
+    "README.markdown",
     "Rakefile",
     "VERSION",
     "Gemfile",
