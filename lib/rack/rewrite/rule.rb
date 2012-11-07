@@ -123,6 +123,7 @@ module Rack
             additional_headers = @options[:headers] || {}
           end
         end
+        status = @options[:status] || 200
         case self.rule_type
         when :r301
           [301, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
@@ -144,12 +145,12 @@ module Rack
           end
           true
         when :send_file
-          [200, {
+          [status, {
             'Content-Length' => ::File.size(interpreted_to).to_s,
             'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
             }.merge!(additional_headers), [::File.read(interpreted_to)]]
         when :x_send_file
-          [200, {
+          [status, {
             'X-Sendfile'     => interpreted_to,
             'Content-Length' => ::File.size(interpreted_to).to_s,
             'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
