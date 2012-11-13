@@ -18,7 +18,6 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "Gemfile",
-    "Gemfile.lock",
     "lib/rack-rewrite.rb",
     "lib/rack/rewrite.rb",
     "lib/rack/rewrite/rule.rb",
