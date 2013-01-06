@@ -185,6 +185,16 @@ class RuleTest < Test::Unit::TestCase
         assert_equal [File.read(@file)], @response[2]
       end
     end
+
+    should 'return proper status for send_file or x_send_file if specified' do
+      [:send_file, :x_send_file].each do |rule_type|
+        file = File.join(TEST_ROOT, 'geminstaller.yml')
+        rule = Rack::Rewrite::Rule.new(rule_type, /.*/, file, :status => 503)
+        env = {'PATH_INFO' => '/abc'}
+        assert_equal 503, rule.apply!(env)[0]
+      end
+    end
+
   end
   
   context 'Rule#matches' do
