@@ -231,7 +231,7 @@ module Rack
 
         # Construct the URL (without domain) from PATH_INFO and QUERY_STRING
         def build_path_from_env(env)
-          path = env['PATH_INFO']
+          path = env['PATH_INFO'] || ''
           path += "?#{env['QUERY_STRING']}" unless env['QUERY_STRING'].nil? || env['QUERY_STRING'].empty?
           path
         end

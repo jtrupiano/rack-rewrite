@@ -407,6 +407,13 @@ class RuleTest < Test::Unit::TestCase
     end
   end
   
+  context 'Mongel 1.2.0.pre2 edge case: root url with a query string' do
+    should 'handle a nil PATH_INFO variable without errors' do
+      rule = Rack::Rewrite::Rule.new(:r301, '/a', '/')
+      assert_equal '?exists', rule.send(:build_path_from_env, {'QUERY_STRING' => 'exists'})
+    end
+  end
+  
   def rack_env_for(url, options = {})
     components = url.split('?')
     {'PATH_INFO' => components[0], 'QUERY_STRING' => components[1] || ''}.merge(options)
