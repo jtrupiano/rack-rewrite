@@ -34,6 +34,19 @@ config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
 end
 ```
 
+If you use `config.threadsafe`, you'll need to `insert_before(Rack::Runtime, Rack::Rewrite)` as `Rack::Lock` does
+not exist when `config.allow_concurrency == true`:
+
+```ruby
+config.middleware.insert_before(Rack::Runtime, Rack::Rewrite) do
+  rewrite   '/wiki/John_Trupiano',  '/john'
+  r301      '/wiki/Yair_Flicker',   '/yair'
+  r302      '/wiki/Greg_Jastrab',   '/greg'
+  r301      %r{/wiki/(\w+)_\w+},    '/$1'
+end
+```
+
+
 ## Redirection codes
 
 All redirect status codes from the [HTTP spec](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html) are supported:
