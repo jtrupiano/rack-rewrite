@@ -189,7 +189,7 @@ their respective status codes.  See these examples:
 
 ```ruby
 r301 '/wiki/John_Trupiano', '/john'                # [1]
-r301 '/wiki/(.*)', 'http://www.google.com/?q=$1'   # [2]
+r301 %r{/wiki/(.*)}, 'http://www.google.com/?q=$1' # [2]
 ```
 
 Recall that rules are interpreted from top to bottom.  So you can install 
