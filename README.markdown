@@ -7,6 +7,7 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 
 * [Rack::Rewrite for Site Maintenance and Downtime](http://blog.smartlogicsolutions.com/2009/11/16/rack-rewrite-for-site-maintenance-and-downtime/)
 * [Rack::Rewrite + Google Analytics Makes Site Transitions Seamless](http://blog.smartlogicsolutions.com/2009/11/24/rack-rewrite-google-analytics-makes-site-transitions-seamless/)
+* [Rack::Rewrite for serving gzipped pipeline assets on Heroku](https://gist.github.com/eliotsykes/6049536)
 
 ## Usage Details
 
