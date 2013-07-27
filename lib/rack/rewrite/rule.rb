@@ -99,7 +99,7 @@ module Rack
 
     # TODO: Break rules into subclasses
     class Rule #:nodoc:
-      attr_reader :rule_type, :from, :to, :options
+      attr_reader :rule_type, :to, :options
       def initialize(rule_type, from, to, options={}) #:nodoc:
         @rule_type, @from, @to, @options = rule_type, from, to, normalize_options(options)
       end
@@ -109,6 +109,11 @@ module Rack
         path = build_path_from_env(rack_env)
 
         self.match_options?(rack_env) && string_matches?(path, self.from)
+      end
+
+      def from
+        return @static_from if @static_from
+        @from.respond_to?(:call) ? @from.call : @static_from = @from
       end
 
       # Either (a) return a Rack response (short-circuiting the Rack stack), or
