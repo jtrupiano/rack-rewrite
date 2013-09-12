@@ -35,6 +35,9 @@ config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
 end
 ```
 
+Note: when using `config.threadsafe!` (default in Rails 4), you'll need to use `Rack::Runtime` instead of `Rack::Lock`.
+
+
 ## Redirection codes
 
 All redirect status codes from the [HTTP spec](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html) are supported:
