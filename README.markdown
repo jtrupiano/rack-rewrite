@@ -35,8 +35,23 @@ config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
 end
 ```
 
-Note: when using `config.threadsafe!` (default in Rails 4), you'll need to use `Rack::Runtime` instead of `Rack::Lock`.
+If you use `config.threadsafe`, you'll need to `insert_before(Rack::Runtime, Rack::Rewrite)` as `Rack::Lock` does
+not exist when `config.allow_concurrency == true`:
 
+```ruby
+config.middleware.insert_before(Rack::Runtime, Rack::Rewrite) do
+  rewrite   '/wiki/John_Trupiano',  '/john'
+  r301      '/wiki/Yair_Flicker',   '/yair'
+  r302      '/wiki/Greg_Jastrab',   '/greg'
+  r301      %r{/wiki/(\w+)_\w+},    '/$1'
+end
+```
+
+Or insert Rack::Rewrite to the top of the stack:
+
+``` ruby
+config.middleware.insert 0, 'Rack::Rewrite' {}
+```
 
 ## Redirection codes
 
