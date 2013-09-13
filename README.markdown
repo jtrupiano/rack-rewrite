@@ -227,7 +227,9 @@ Using the :host option you can match requests to a specific hostname.
 ```ruby
 r301 "/features", "/facial_features", :host => "facerecognizer.com"
 ```
-This rule will only match when the hostname is "facerecognizer.com"
+This rule will only match when the hostname is "facerecognizer.com".
+
+The :host option accepts a symbol, string, or regexp.
 
 ### :headers
 
@@ -251,6 +253,17 @@ send_file /^.+\.(?:ico|jpg|jpeg|png|gif|)$/,
           :headers => lambda { { 'Expires' => 1.year.from_now.httpdate } }
 ```
 
+### :scheme
+
+Using the :scheme option you can restrict the matching of a rule by the protocol of a given request.
+
+```ruby
+# Redirect all http traffic to https
+r301 %r{.*}, 'https://www.example.tld$&', :scheme => 'http'
+```
+
+The :scheme option accepts a symbol, string, or regexp.
+
 ### :method
 
 Using the :method option you can restrict the matching of a rule by the HTTP 
@@ -263,6 +276,8 @@ r301 "/players", "/current_players", :method => :get
 # and redirect POST's another way
 r302 "/players", "/no_longer_available.html?message=No&longer&supported", :method => :post
 ```
+
+The :method option accepts a symbol, string, or regexp.
 
 ### :if
 
