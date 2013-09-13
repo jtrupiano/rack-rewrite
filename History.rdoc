@@ -1,3 +1,9 @@
+=== 1.4.01 / 2013-09-13
+* API
+  * Add support for lambda matchers
+* Maintenance
+  * Update README for usage with Rails 4 and threading, :scheme option
+
 === 1.2.1 / 2011-09-20
 * Maintenance
   * Use Rack::Request to match the host
@@ -30,7 +36,7 @@
 === 0.2.1 / 2010-01-06
 * API
   * Implement $& substitution pattern (thanks to {Ben Brinckerhoff}[http://github.com/bhb])
-  
+
 * Maintenance
   * Ignore empty captures instead of failing during subsitution (thanks to {Ben Brinckerhoff}[http://github.com/bhb])
   * Play nice with Rack::Test requests which only set PATH_INFO and not REQUEST_URI (thanks to {@docunext}[http://github.com/docunext])
@@ -46,14 +52,14 @@
 * Documentation
   * Add example of writing capistrano maintenance page rewrite rules
   * Add examples of rule guards and arbitrary rewriting
-  * Add examples of :send_file and :x_send_file rules    
+  * Add examples of :send_file and :x_send_file rules
 
 === 0.1.3 / 2009-11-14
 * Maintenance
   * Ensure Content-Type header is set for 301's and 302's (thanks to Sebastian Röbke)
 * Documentation
   * Add HISTORY.rdoc
-  
+
 === 0.1.2 / 2009-10-13
 
 * Initial Feature Set
