@@ -1,6 +1,6 @@
 # rack-rewrite
 
-A rack middleware for defining and applying rewrite rules. In many cases you 
+A rack middleware for defining and applying rewrite rules. In many cases you
 can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 
 ## Usage Examples
@@ -12,7 +12,7 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 ## Usage Details
 
 ### Sample rackup file
-  
+
 ```ruby
 gem 'rack-rewrite', '~> 1.2.1'
 require 'rack/rewrite'
@@ -76,7 +76,7 @@ behaves the same as 303.
 
 ### Rebuild of existing site in a new technology
 
-It's very common for sites built in older technologies to be rebuilt with the 
+It's very common for sites built in older technologies to be rebuilt with the
 latest and greatest.  Let's consider a site that has already established quite
 a bit of "google juice."  When we launch the new site, we don't want to lose
 that hard-earned reputation.  By writing rewrite rules that issue 301's for
@@ -127,11 +127,11 @@ RewriteRule ^.*$ /system/maintenance.html [L]
 ```
 
 This rewrite rule says to render a maintenance page for all non-asset requests
-if the maintenance file exists.  In capistrano, you can quickly upload a 
+if the maintenance file exists.  In capistrano, you can quickly upload a
 maintenance file using:
 
 `cap deploy:web:disable REASON=upgrade UNTIL=12:30PM`
-  
+
 We can replace the mod_rewrite rules with the following Rack::Rewrite rule:
 
 ```ruby
@@ -150,7 +150,7 @@ send_file /(.*)$(?<!css|png|jpg)/, maintenance_file, :if => Proc.new { |rack_env
 }
 ```
 
-For those using the oniguruma gem with their ruby 1.8 installation, you can 
+For those using the oniguruma gem with their ruby 1.8 installation, you can
 get away with:
 
 ```ruby
@@ -164,9 +164,9 @@ send_file Oniguruma::ORegexp.new("(.*)$(?<!css|png|jpg)"), maintenance_file, :if
 
 ### :rewrite
 
-Calls to #rewrite will simply update the PATH_INFO, QUERY_STRING and 
-REQUEST_URI HTTP header values and pass the request onto the next chain in 
-the Rack stack.  The URL that a user's browser will show will not be changed.  
+Calls to #rewrite will simply update the PATH_INFO, QUERY_STRING and
+REQUEST_URI HTTP header values and pass the request onto the next chain in
+the Rack stack.  The URL that a user's browser will show will not be changed.
 See these examples:
 
 ```ruby
@@ -175,14 +175,14 @@ rewrite %r{/wiki/(\w+)_\w+}, '/$1'       # [2]
 ```
 
 For [1], the user's browser will continue to display /wiki/John_Trupiano, but
-the actual HTTP header values for PATH_INFO and REQUEST_URI in the request 
+the actual HTTP header values for PATH_INFO and REQUEST_URI in the request
 will be changed to /john for subsequent nodes in the Rack stack.  Rails
 reads these headers to determine which routes will match.
 
-Rule [2] showcases the use of regular expressions and substitutions.  [2] is a 
+Rule [2] showcases the use of regular expressions and substitutions.  [2] is a
 generalized version of [1] that will match any /wiki/FirstName_LastName URL's
-and rewrite them as the first name only.  This is an actual catch-all rule we 
-applied when we rebuilt our website in September 2009 
+and rewrite them as the first name only.  This is an actual catch-all rule we
+applied when we rebuilt our website in September 2009
 ( http://www.smartlogicsolutions.com ).
 
 ### :r301, :r302, :r303, :r307
@@ -196,7 +196,7 @@ r301 '/wiki/John_Trupiano', '/john'                # [1]
 r301 %r{/wiki/(.*)}, 'http://www.google.com/?q=$1' # [2]
 ```
 
-Recall that rules are interpreted from top to bottom.  So you can install 
+Recall that rules are interpreted from top to bottom.  So you can install
 "default" rewrite rules if you like.  [2] is a sample default rule that
 will redirect all other requests to the wiki to a google search.
 
@@ -233,7 +233,7 @@ The :host option accepts a symbol, string, or regexp.
 
 ### :headers
 
-Using the :headers option you can set custom response headers e.g. for HTTP 
+Using the :headers option you can set custom response headers e.g. for HTTP
 caching instructions.
 
 ```ruby
@@ -266,7 +266,7 @@ The :scheme option accepts a symbol, string, or regexp.
 
 ### :method
 
-Using the :method option you can restrict the matching of a rule by the HTTP 
+Using the :method option you can restrict the matching of a rule by the HTTP
 method of a given request.
 
 ```ruby
@@ -282,13 +282,13 @@ The :method option accepts a symbol, string, or regexp.
 ### :if
 
 Using the :if option you can define arbitrary rule guards.  Guards are any
-object responding to #call that return true or false indicating whether the 
-rule matches.  The following example demonstrates how the presence of a 
+object responding to #call that return true or false indicating whether the
+rule matches.  The following example demonstrates how the presence of a
 maintenance page on the filesystem can be utilized to take your site(s) offline.
 
 ```ruby
 maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
-x_send_file /.*/, maintenance_file, :if => Proc.new { |rack_env| 
+x_send_file /.*/, maintenance_file, :if => Proc.new { |rack_env|
   File.exists?(maintenance_file)
 }
 ```
@@ -308,7 +308,7 @@ This will not match the relative URL /features but would match /features.xml.
 
 ### Keeping your querystring
 
-When rewriting a URL, you may want to keep your querystring in tact (for 
+When rewriting a URL, you may want to keep your querystring in tact (for
 example if you're tracking traffic sources).  You will need to include a
 capture group and substitution pattern in your rewrite rule to achieve this.
 
@@ -321,7 +321,7 @@ will substitute the querystring back into the rewritten URL (via `$1`).
 
 ### Arbitrary Rewriting
 
-All rules support passing a Proc as the second argument allowing you to
+All rules support passing a Proc as the first or second argument allowing you to
 perform arbitrary rewrites.  The following rule will rewrite all requests
 received between 12AM and 8AM to an unavailable page.
 
@@ -329,6 +329,13 @@ received between 12AM and 8AM to an unavailable page.
   rewrite %r{(.*)}, lambda { |match, rack_env|
     Time.now.hour < 8 ? "/unavailable.html" : match[1]
   }
+```
+
+This rule will redirect all requests paths starting with a current date
+string to /today.html
+
+```ruby
+  r301 lambda { "/#{Time.current.strftime(%m%d%Y)}.html" }, '/today.html'
 ```
 
 ## Contribute
