@@ -323,7 +323,7 @@ This will not match the relative URL /features but would match /features.xml.
 
 ### Keeping your querystring
 
-When rewriting a URL, you may want to keep your querystring in tact (for
+When rewriting a URL, you may want to keep your querystring intact (for
 example if you're tracking traffic sources).  You will need to include a
 capture group and substitution pattern in your rewrite rule to achieve this.
 
