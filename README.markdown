@@ -353,6 +353,33 @@ string to /today.html
   r301 lambda { "/#{Time.current.strftime(%m%d%Y)}.html" }, '/today.html'
 ```
 
+
+##Alternative loaders
+
+rack-rewrite can also be driven by external loaders. Bundled with this library is a loader for YAML files.
+
+```
+config.middleware.insert_before(Rack::Lock, Rack::Rewrite, 
+    :klass => Rack::Rewrite::YamlRuleSet, 
+    :options => {:file_name => @file_name})
+```
+
+Using syntax like
+
+```
+- 
+    method: r301
+    from: !ruby/regexp '/(.*)/print'
+    to : '$1/printer_friendly'
+    options : 
+        host : 'example.com'
+```
+
+Any class can be used here as long as: 
+  
+  - the class take an options hash
+  -  `#rules` returns an array of `Rack::Rewrite::Rule` instances
+
 ## Contribute
 
 rack-rewrite is maintained by [@travisjeffery](http://github.com/travisjeffery).
