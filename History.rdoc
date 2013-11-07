@@ -1,3 +1,7 @@
+== 1.4.1 / 2013-11-07
+* API
+  * Add support for external loaders (#50)
+
 === 1.4.01 / 2013-09-13
 * API
   * Add support for lambda matchers
