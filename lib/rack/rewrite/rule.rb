@@ -4,7 +4,7 @@ module Rack
   class Rewrite
     class RuleSet
       attr_reader :rules
-      def initialize #:nodoc:
+      def initialize(options = {})#:nodoc:
         @rules = []
       end
 

@@ -1,0 +1,16 @@
+- 
+    method: r301
+    from: '/abc'
+    to : '/def'
+- 
+    method: r301
+    from: !ruby/regexp '/(.*)/abc/'
+    to : '$1/regexed_path'
+- 
+    method: r301
+    from: '/withhost'
+    to : '/anotherhost'
+    options : 
+        host : 'example.com'
+
+
