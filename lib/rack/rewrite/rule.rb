@@ -90,6 +90,10 @@ module Rack
           add_rule :x_send_file, *args
         end
 
+        def send_data(*args)
+          add_rule :send_data, *args
+        end
+        
       private
         def add_rule(method, from, to, options = {}) #:nodoc:
           @rules << Rule.new(method.to_sym, from, to, options)
@@ -160,6 +164,11 @@ module Rack
             'Content-Length' => ::File.size(interpreted_to).to_s,
             'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
             }.merge!(additional_headers), []]
+        when :send_data
+          [status, {
+            'Content-Type' => interpreted_to.bytesize,
+            'Content-Type' => 'text/plain',
+          }.merge!(additional_headers), [interpreted_to]]
         else
           raise Exception.new("Unsupported rule: #{self.rule_type}")
         end
