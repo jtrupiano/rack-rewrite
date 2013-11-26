@@ -167,7 +167,7 @@ module Rack
         when :send_data
           [status, {
             'Content-Type' => interpreted_to.bytesize,
-            'Content-Type' => 'text/plain',
+            'Content-Type' => 'text/html',
           }.merge!(additional_headers), [interpreted_to]]
         else
           raise Exception.new("Unsupported rule: #{self.rule_type}")
