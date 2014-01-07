@@ -14,6 +14,7 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 ### Sample rackup file
 
 ```ruby
+# config.ru
 gem 'rack-rewrite', '~> 1.2.1'
 require 'rack/rewrite'
 use Rack::Rewrite do
@@ -27,6 +28,7 @@ end
 ### Sample usage in a rails app
 
 ```ruby
+# config/application.rb
 config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
   rewrite   '/wiki/John_Trupiano',  '/john'
   r301      '/wiki/Yair_Flicker',   '/yair'
