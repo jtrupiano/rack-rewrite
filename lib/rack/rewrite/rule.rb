@@ -90,10 +90,13 @@ module Rack
           add_rule :x_send_file, *args
         end
 
+        # Creates a rule taht will render the raw data if matched
+        #  send_data /*/, 'public/system/maintenance.html',
+        #    :if => Proc.new { File.exists?('public/system/maintenance.html') }
         def send_data(*args)
           add_rule :send_data, *args
         end
-        
+
       private
         def add_rule(method, from, to, options = {}) #:nodoc:
           @rules << Rule.new(method.to_sym, from, to, options)

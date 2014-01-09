@@ -217,9 +217,9 @@ Recall that rules are interpreted from top to bottom.  So you can install
 "default" rewrite rules if you like.  [2] is a sample default rule that
 will redirect all other requests to the wiki to a google search.
 
-### :send_file, :x_send_file
+### :send_file, :x_send_file, :send_data
 
-Calls to #send_file and #x_send_file also have the same signature as #rewrite.
+Calls to #send_file and #x_send_file and #send_data also have the same signature as #rewrite.
 If the rule matches, the 'to' parameter is interpreted as a path to a file
 to be rendered instead of passing the application call up the rack stack.
 
@@ -228,6 +228,9 @@ send_file /*/, 'public/spammers.htm', :if => Proc.new { |rack_env|
   rack_env['HTTP_REFERER'] =~ 'spammers.com'
 }
 x_send_file /^blog\/.*/, 'public/blog_offline.htm', :if => Proc.new { |rack_env|
+  File.exists?('public/blog_offline.htm')
+}
+send_data /^blog\/.*/, 'public/blog_offline.png', :if => Proc.new { |rack_env|
   File.exists?('public/blog_offline.htm')
 }
 ```
@@ -361,24 +364,24 @@ string to /today.html
 rack-rewrite can also be driven by external loaders. Bundled with this library is a loader for YAML files.
 
 ```
-config.middleware.insert_before(Rack::Lock, Rack::Rewrite, 
-    :klass => Rack::Rewrite::YamlRuleSet, 
+config.middleware.insert_before(Rack::Lock, Rack::Rewrite,
+    :klass => Rack::Rewrite::YamlRuleSet,
     :options => {:file_name => @file_name})
 ```
 
 Using syntax like
 
 ```
-- 
+-
     method: r301
     from: !ruby/regexp '/(.*)/print'
     to : '$1/printer_friendly'
-    options : 
+    options :
         host : 'example.com'
 ```
 
-Any class can be used here as long as: 
-  
+Any class can be used here as long as:
+
   - the class take an options hash
   -  `#rules` returns an array of `Rack::Rewrite::Rule` instances
 
