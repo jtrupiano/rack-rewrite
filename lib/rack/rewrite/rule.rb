@@ -136,6 +136,7 @@ module Rack
           end
         end
         status = @options[:status] || 200
+        content_type = @options[:content_type] || 'text/html'
         case self.rule_type
         when :r301
           [301, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
@@ -169,8 +170,8 @@ module Rack
             }.merge!(additional_headers), []]
         when :send_data
           [status, {
-            'Content-Type' => interpreted_to.bytesize,
-            'Content-Type' => 'text/html',
+            'Content-Length' => interpreted_to.bytesize,
+            'Content-Type' => content_type,
           }.merge!(additional_headers), [interpreted_to]]
         else
           raise Exception.new("Unsupported rule: #{self.rule_type}")
