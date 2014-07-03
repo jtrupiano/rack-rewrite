@@ -15,7 +15,7 @@ can get away with rack-rewrite instead of writing Apache mod_rewrite rules.
 
 ```ruby
 # config.ru
-gem 'rack-rewrite', '~> 1.2.1'
+gem 'rack-rewrite', '~> 1.5.0'
 require 'rack/rewrite'
 use Rack::Rewrite do
   rewrite   '/wiki/John_Trupiano',  '/john'
