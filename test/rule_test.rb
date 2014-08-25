@@ -74,6 +74,13 @@ class RuleTest < Test::Unit::TestCase
       assert_equal '/john?bio=1', env['REQUEST_URI']
     end
 
+    should 'support the last match back reference' do
+      rule = Rack::Rewrite::Rule.new(:rewrite, %r{/(\w+)/(\w+)}, '/$+')
+      env = {'PATH_INFO' => '/abc/def'}
+      rule.apply!(env)
+      assert_equal '/def', env['REQUEST_URI']
+    end
+
     should 'set Content-Type header to text/html for a 301 and 302 request for a .html page' do
       supported_status_codes.each do |rule_type|
         rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def.html')

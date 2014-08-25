@@ -243,6 +243,7 @@ module Rack
           (match(path).size - 1).downto(1) do |num|
             computed_to.gsub!("$#{num}", match(path)[num].to_s)
           end
+          computed_to.gsub!("$+", match(path)[-1].to_s)
           return computed_to
         end
 
