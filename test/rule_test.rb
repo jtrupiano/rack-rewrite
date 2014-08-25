@@ -74,6 +74,15 @@ class RuleTest < Test::Unit::TestCase
       assert_equal '/john?bio=1', env['REQUEST_URI']
     end
 
+    should 'normalise the QUERY_STRING when a rewrite rule adds to and/or removes from it' do
+      rule = Rack::Rewrite::Rule.new(:rewrite, %r{/\w+\?param=(\w+)(&.*)?}, '/$1$2&bonus=true')
+      env = {'PATH_INFO' => '/john', 'QUERY_STRING' => 'param=abc&param2=def&param3=ghi'}
+      rule.apply!(env)
+      assert_equal '/abc', env['PATH_INFO']
+      assert_equal 'param2=def&param3=ghi&bonus=true', env['QUERY_STRING']
+      assert_equal '/abc?param2=def&param3=ghi&bonus=true', env['REQUEST_URI']
+    end
+
     should 'support the last match back reference' do
       rule = Rack::Rewrite::Rule.new(:rewrite, %r{/(\w+)/(\w+)}, '/$+')
       env = {'PATH_INFO' => '/abc/def'}

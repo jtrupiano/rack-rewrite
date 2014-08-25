@@ -244,7 +244,7 @@ module Rack
             computed_to.gsub!("$#{num}", match(path)[num].to_s)
           end
           computed_to.gsub!("$+", match(path)[-1].to_s)
-          return computed_to
+          return normalise_query_string(computed_to)
         end
 
         # Construct the URL (without domain) from PATH_INFO and QUERY_STRING
@@ -252,6 +252,10 @@ module Rack
           path = env['PATH_INFO'] || ''
           path += "?#{env['QUERY_STRING']}" unless env['QUERY_STRING'].nil? || env['QUERY_STRING'].empty?
           path
+        end
+        
+        def normalise_query_string(uri)
+          uri.gsub('?', '&').sub('&', '?')
         end
 
         def redirect_message(location)
