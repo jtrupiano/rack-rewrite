@@ -27,6 +27,8 @@ end
 
 ### Sample usage in a rails app
 
+Rails 3 or less:
+
 ```ruby
 # config/application.rb
 config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
@@ -37,8 +39,7 @@ config.middleware.insert_before(Rack::Lock, Rack::Rewrite) do
 end
 ```
 
-If you use `config.threadsafe`, you'll need to `insert_before(Rack::Runtime, Rack::Rewrite)` as `Rack::Lock` does
-not exist when `config.allow_concurrency == true`:
+Rails 4+ or if you use `config.threadsafe`, you'll need to `insert_before(Rack::Runtime, Rack::Rewrite)` as `Rack::Lock` does not exist when `config.allow_concurrency == true`:
 
 ```ruby
 config.middleware.insert_before(Rack::Runtime, Rack::Rewrite) do
