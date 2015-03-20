@@ -226,7 +226,7 @@ module Rack
 
         def string_matches?(string, matcher)
           if self.is_a_regexp?(matcher)
-            string =~ matcher
+            (string =~ matcher) != nil
           elsif matcher.is_a?(String)
             string == matcher
           elsif matcher.is_a?(Symbol)
