@@ -196,7 +196,7 @@ module Rack
           # negative matches
           matches << !string_matches?(path, options[:not]) if options[:not]
 
-          # possitive matches
+          # positive matches
           matches << string_matches?(env['REQUEST_METHOD'], options[:method]) if options[:method]
           matches << string_matches?(request.host, options[:host]) if options[:host]
           matches << string_matches?(request.scheme, options[:scheme]) if options[:scheme]
