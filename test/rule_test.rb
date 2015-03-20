@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class RuleTest < Test::Unit::TestCase
+class RuleTest < ZeroTest
 
   TEST_ROOT = File.dirname(__FILE__)
 

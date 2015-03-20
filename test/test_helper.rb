@@ -16,3 +16,16 @@ end
 def supported_status_codes
   [:r301, :r302, :r303, :r307]
 end
+
+class ZeroTest < Test::Unit::TestCase
+  def assert(test, msg= nil)
+    if test.class == Fixnum && test.zero?
+      super(false)
+    end
+    if msg.nil?
+      super(test)
+    else
+      super(test, msg)
+    end
+  end
+end
