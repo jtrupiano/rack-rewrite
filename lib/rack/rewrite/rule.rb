@@ -169,7 +169,7 @@ module Rack
             }.merge!(additional_headers), []]
         when :send_data
           [status, {
-            'Content-Type' => interpreted_to.bytesize,
+            'Content-Length' => interpreted_to.bytesize,
             'Content-Type' => 'text/html',
           }.merge!(additional_headers), [interpreted_to]]
         else
