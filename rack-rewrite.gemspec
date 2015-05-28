@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
     "lib/rack/rewrite.rb",
     "lib/rack/rewrite/rule.rb",
     "lib/rack/rewrite/version.rb",
+    "lib/rack/rewrite/yaml_rule_set.rb",
     "rack-rewrite.gemspec",
     "test/geminstaller.yml",
     "test/rack-rewrite_test.rb",
