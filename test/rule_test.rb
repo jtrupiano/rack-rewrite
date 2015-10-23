@@ -371,6 +371,19 @@ class RuleTest < Test::Unit::TestCase
       end
     end
 
+    context 'SSL redirect with scheme option' do
+      setup do
+        @rule = Rack::Rewrite::Rule.new(:r302, %r{.*}, 'https://www.mydomain.com$&', :scheme => 'http')
+      end
+
+      should 'work' do
+        env = {'PATH_INFO' => '/foo/bar', 'QUERY_STRING' => 'abc=1', 'SERVER_NAME' => 'mydomain.com', "rack.url_scheme" => "http"}
+        assert @rule.matches?(env)
+        rack_response = @rule.apply!(env)
+        assert_equal 'https://www.mydomain.com/foo/bar?abc=1', rack_response[1]['Location']
+      end
+    end
+
     context 'Given a lambda matcher' do
       setup do
         @rule = Rack::Rewrite::Rule.new(:r302, ->{ Thread.current[:test_matcher] }, '/today' )
