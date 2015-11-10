@@ -149,8 +149,12 @@ module Rack
           # return [200, {}, {:content => env.inspect}]
           env['REQUEST_URI'] = interpreted_to
           if q_index = interpreted_to.index('?')
-            env['PATH_INFO'] = interpreted_to[0..q_index-1]
             env['QUERY_STRING'] = interpreted_to[q_index+1..interpreted_to.size-1]
+            if path_without_host = interpreted_to.match(/\/\/[^\/]+(\/[^?]*)/)
+              env['PATH_INFO'] = path_without_host[1]
+            else
+              env['PATH_INFO'] = interpreted_to[0..q_index-1]
+            end
           else
             env['PATH_INFO'] = interpreted_to
             env['QUERY_STRING'] = ''
