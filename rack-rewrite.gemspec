@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.date = Date.today.to_s
   s.description = %q{A rack middleware for enforcing rewrite rules. In many cases you can get away with rack-rewrite instead of writing Apache mod_rewrite rules.}
   s.email = %q{travisjeffery@gmail.com}
+  s.licenses = ["MIT"]
   s.extra_rdoc_files = [
     "LICENSE",
     "History.rdoc",
