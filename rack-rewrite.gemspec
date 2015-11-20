@@ -8,6 +8,8 @@ Gem::Specification.new do |s|
   s.authors = ["Travis Jeffery", "John Trupiano"]
   s.date = Date.today.to_s
   s.description = %q{A rack middleware for enforcing rewrite rules. In many cases you can get away with rack-rewrite instead of writing Apache mod_rewrite rules.}
+  s.licenses = ['MIT']
+
   s.email = %q{travisjeffery@gmail.com}
   s.licenses = ["MIT"]
   s.extra_rdoc_files = [
