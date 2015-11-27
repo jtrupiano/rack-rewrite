@@ -148,13 +148,9 @@ module Rack
         when :rewrite
           # return [200, {}, {:content => env.inspect}]
           env['REQUEST_URI'] = interpreted_to
-          if q_index = interpreted_to.index('?')
-            env['PATH_INFO'] = interpreted_to[0..q_index-1]
-            env['QUERY_STRING'] = interpreted_to[q_index+1..interpreted_to.size-1]
-          else
-            env['PATH_INFO'] = interpreted_to
-            env['QUERY_STRING'] = ''
-          end
+          url_parts = interpreted_to.match(/(\/\/[^\/]+)?(\/[^?]*)(\?(.*))?/)
+          env['PATH_INFO'] = url_parts[2].to_s
+          env['QUERY_STRING'] = url_parts[4].to_s
           true
         when :send_file
           [status, {

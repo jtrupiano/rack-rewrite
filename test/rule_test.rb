@@ -65,6 +65,15 @@ class RuleTest < Test::Unit::TestCase
       assert_equal '/yair?show_bio=1', env['REQUEST_URI']
     end
 
+    should 'remove the host from PATH_INFO when rewriting the host' do
+      rule = Rack::Rewrite::Rule.new(:rewrite, %r{/(\w+)/(.*)}, "http://$1.test.com/$2")
+      env = {'PATH_INFO' => '/subdomain/path', 'QUERY_STRING' => 'param=1'}
+      rule.apply!(env)
+      assert_equal '/path', env['PATH_INFO']
+      assert_equal 'param=1', env['QUERY_STRING']
+      assert_equal 'http://subdomain.test.com/path?param=1', env['REQUEST_URI']
+    end
+
     should 'update the QUERY_STRING when a rewrite rule changes its value' do
       rule = Rack::Rewrite::Rule.new(:rewrite, %r{/(\w+)\?show_bio=(\d)}, '/$1?bio=$2')
       env = {'PATH_INFO' => '/john', 'QUERY_STRING' => 'show_bio=1'}
