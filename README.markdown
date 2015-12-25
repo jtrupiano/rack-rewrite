@@ -23,6 +23,7 @@ use Rack::Rewrite do
   r302      '/wiki/Greg_Jastrab',   '/greg'
   r301      %r{/wiki/(\w+)_\w+},    '/$1'
 end
+run lambda { |env| [200, {'Content-Type' => 'text/plain'}, ['OK']] }
 ```
 
 ### Sample usage in a rails app
