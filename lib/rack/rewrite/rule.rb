@@ -119,7 +119,7 @@ module Rack
       end
 
       def from
-        return @static_from if @static_from
+        return @static_from if defined?(@static_from)
         @from.respond_to?(:call) ? @from.call : @static_from = @from
       end
 
