@@ -155,7 +155,7 @@ We can replace the mod_rewrite rules with the following Rack::Rewrite rule:
 ```ruby
 maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
 send_file /.*/, maintenance_file, :if => Proc.new { |rack_env|
-  File.exists?(maintenance_file) && rack_env['PATH_INFO'] !~ /\.(css|jpg|png)/
+  File.exist?(maintenance_file) && rack_env['PATH_INFO'] !~ /\.(css|jpg|png)/
 }
 ```
 
@@ -164,7 +164,7 @@ If you're running Ruby 1.9, this rule is simplified:
 ```ruby
 maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
 send_file /(.*)$(?<!css|png|jpg)/, maintenance_file, :if => Proc.new { |rack_env|
-  File.exists?(maintenance_file)
+  File.exist?(maintenance_file)
 }
 ```
 
@@ -174,7 +174,7 @@ get away with:
 ```ruby
 maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
 send_file Oniguruma::ORegexp.new("(.*)$(?<!css|png|jpg)"), maintenance_file, :if => Proc.new { |rack_env|
-  File.exists?(maintenance_file)
+  File.exist?(maintenance_file)
 }
 ```
 
@@ -229,10 +229,10 @@ send_file /*/, 'public/spammers.htm', :if => Proc.new { |rack_env|
   rack_env['HTTP_REFERER'] =~ 'spammers.com'
 }
 x_send_file /^blog\/.*/, 'public/blog_offline.htm', :if => Proc.new { |rack_env|
-  File.exists?('public/blog_offline.htm')
+  File.exist?('public/blog_offline.htm')
 }
 send_data /^blog\/.*/, 'public/blog_offline.png', :if => Proc.new { |rack_env|
-  File.exists?('public/blog_offline.htm')
+  File.exist?('public/blog_offline.htm')
 }
 ```
 
@@ -310,7 +310,7 @@ maintenance page on the filesystem can be utilized to take your site(s) offline.
 ```ruby
 maintenance_file = File.join(RAILS_ROOT, 'public', 'system', 'maintenance.html')
 x_send_file /.*/, maintenance_file, :if => Proc.new { |rack_env|
-  File.exists?(maintenance_file)
+  File.exist?(maintenance_file)
 }
 ```
 

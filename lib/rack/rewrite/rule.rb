@@ -18,7 +18,7 @@ module Rack
         #
         #  rewrite '/wiki/John_Trupiano', '/john'
         #  rewrite %r{/wiki/(\w+)_\w+}, '/$1'
-        #  rewrite %r{(.*)}, '/maintenance.html', :if => lambda { File.exists?('maintenance.html') }
+        #  rewrite %r{(.*)}, '/maintenance.html', :if => lambda { File.exist?('maintenance.html') }
         def rewrite(*args)
           add_rule :rewrite, *args
         end
@@ -76,7 +76,7 @@ module Rack
         # Creates a rule that will render a file if matched.
         #
         #  send_file /*/, 'public/system/maintenance.html',
-        #    :if => Proc.new { File.exists?('public/system/maintenance.html') }
+        #    :if => Proc.new { File.exist?('public/system/maintenance.html') }
         def send_file(*args)
           add_rule :send_file, *args
         end
@@ -85,14 +85,14 @@ module Rack
         # if matched.
         #
         #  x_send_file /*/, 'public/system/maintenance.html',
-        #    :if => Proc.new { File.exists?('public/system/maintenance.html') }
+        #    :if => Proc.new { File.exist?('public/system/maintenance.html') }
         def x_send_file(*args)
           add_rule :x_send_file, *args
         end
 
         # Creates a rule taht will render the raw data if matched
         #  send_data /*/, 'public/system/maintenance.html',
-        #    :if => Proc.new { File.exists?('public/system/maintenance.html') }
+        #    :if => Proc.new { File.exist?('public/system/maintenance.html') }
         def send_data(*args)
           add_rule :send_data, *args
         end
