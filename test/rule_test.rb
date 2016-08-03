@@ -6,7 +6,7 @@ class RuleTest < Test::Unit::TestCase
 
   def self.should_pass_maintenance_tests
     context 'and the maintenance file does in fact exist' do
-      setup { File.stubs(:exists?).returns(true) }
+      setup { File.stubs(:exist?).returns(true) }
 
       should('match for the root')              { assert @rule.matches?(rack_env_for('/')) }
       should('match for a regular rails route') { assert @rule.matches?(rack_env_for('/users/1')) }
@@ -306,13 +306,13 @@ class RuleTest < Test::Unit::TestCase
     context 'Given a rule with a guard that checks for the presence of a file' do
       setup do
         @rule = Rack::Rewrite::Rule.new(:rewrite, %r{(.)*}, '/maintenance.html', lambda { |rack_env|
-          File.exists?('maintenance.html')
+          File.exist?('maintenance.html')
         })
       end
 
       context 'when the file exists' do
         setup do
-          File.stubs(:exists?).returns(true)
+          File.stubs(:exist?).returns(true)
         end
 
         should 'match' do
@@ -322,7 +322,7 @@ class RuleTest < Test::Unit::TestCase
 
       context 'when the file does not exist' do
         setup do
-          File.stubs(:exists?).returns(false)
+          File.stubs(:exist?).returns(false)
         end
 
         should 'not match' do
@@ -335,7 +335,7 @@ class RuleTest < Test::Unit::TestCase
       setup do
         @rule = Rack::Rewrite::Rule.new(:rewrite, /.*/, '/system/maintenance.html', lambda { |rack_env|
           maintenance_file = File.join('system', 'maintenance.html')
-          File.exists?(maintenance_file) && rack_env['PATH_INFO'] !~ /\.(css|jpg|png)/
+          File.exist?(maintenance_file) && rack_env['PATH_INFO'] !~ /\.(css|jpg|png)/
         })
       end
       should_pass_maintenance_tests
@@ -345,7 +345,7 @@ class RuleTest < Test::Unit::TestCase
       context 'Given the negative lookahead regular expression version of the capistrano maintenance.html rewrite rule given in our README' do
         setup do
           @rule = Rack::Rewrite::Rule.new(:rewrite, negative_lookahead_regexp, '/system/maintenance.html', lambda { |rack_env|
-            File.exists?(File.join('public', 'system', 'maintenance.html'))
+            File.exist?(File.join('public', 'system', 'maintenance.html'))
           })
         end
         should_pass_maintenance_tests
