@@ -46,7 +46,7 @@ class RuleTest < Test::Unit::TestCase
       should "include a link to the result of #interpret_to for a #{rule_type}" do
         rule = Rack::Rewrite::Rule.new(rule_type, %r{/abc}, '/def')
         env = {'PATH_INFO' => '/abc'}
-        assert_match /\/def/, rule.apply!(env)[2][0]
+        assert_match %r{\/def}, rule.apply!(env)[2][0]
       end
     end
 
