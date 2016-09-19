@@ -325,6 +325,17 @@ rewrite %r{^\/features}, '/facial_features', :not => '/features'
 
 This will not match the relative URL /features but would match /features.xml.
 
+### :not_host
+
+Using the :not_host option you can negatively match against the hostname.  This can
+be useful when writing a regular expression match is difficult.
+
+```ruby
+rewrite %r{^\/features}, '/facial_features', :not_host => 'localhost'
+```
+
+This will only match the hostname, not the full URL.
+
 ## Tips
 
 ### Keeping your querystring
