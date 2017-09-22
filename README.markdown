@@ -53,7 +53,7 @@ end
 Or insert Rack::Rewrite to the top of the stack:
 
 ``` ruby
-config.middleware.insert 0, 'Rack::Rewrite' {}
+config.middleware.insert 0, Rack::Rewrite {}
 ```
 
 ## Redirection codes
