@@ -360,7 +360,7 @@ string to /today.html
 ```
 
 
-##Alternative loaders
+## Alternative loaders
 
 rack-rewrite can also be driven by external loaders. Bundled with this library is a loader for YAML files.
 
